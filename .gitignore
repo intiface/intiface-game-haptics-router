@@ -1,0 +1,7 @@
+**/bin/**
+**/obj/**
+.vs
+*.DotSettings.user
+packages
+**/EasyHook*
+**/EasyLoad*
