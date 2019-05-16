@@ -29,8 +29,17 @@
         <TextBox Grid.Row="2" Grid.Column="1">12346</TextBox>
         <Label Grid.Row="3" Grid.Column="0">Insecure Port:</Label>
         <TextBox Grid.Row="3" Grid.Column="1">12345</TextBox>
-        <Label Grid.Row="4" Grid.Column="1">Connecting</Label>
+        <Label Grid.Row="4" Grid.Column="1" Name="ConnectionStatus">Connecting</Label>
         <Separator Grid.Row="5" Grid.ColumnSpan="3"></Separator>
-        <ListBox Grid.Row="6" Grid.ColumnSpan="3" />
+        <ListBox Grid.Row="6" Grid.ColumnSpan="3" Name="DeviceListBox">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <ListBoxItem>
+                        <CheckBox Content="{Binding Path='Name'}" IsChecked="{Binding Path='IsChecked'}" />
+                    </ListBoxItem>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+
+        </ListBox>
     </Grid>
 </UserControl>
