@@ -43,15 +43,23 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
-                    <local:ProcessControl></local:ProcessControl>
+                    <local:ProcessControl x:Name="_processTab"></local:ProcessControl>
                 </Grid>
             </TabItem>
             <TabItem Header="GVR - Mod" Padding="10, 3, 10, 3">
                 <Grid />
             </TabItem>
             <TabItem Header="Visualizer" Padding="10, 3, 10, 3">
-                <Grid />
-            </TabItem>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <local:VisualizerControl x:Name="_graphTab"></local:VisualizerControl>
+    </Grid>
+    </TabItem>
             <TabItem Header="About" Padding="10, 3, 10, 3">
             </TabItem>
         </TabControl>
