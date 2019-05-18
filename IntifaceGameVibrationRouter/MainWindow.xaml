@@ -28,10 +28,10 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"></RowDefinition>
-                </Grid.RowDefinitions>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
                     <local:IntifaceControl></local:IntifaceControl>
                 </Grid>
             </TabItem>
@@ -43,23 +43,31 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
-                    <local:ProcessControl x:Name="_processTab"></local:ProcessControl>
+                    <local:XInputModControl x:Name="_processTab"></local:XInputModControl>
                 </Grid>
             </TabItem>
             <TabItem Header="GVR - Mod" Padding="10, 3, 10, 3">
-                <Grid />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <local:UnityModControl x:Name="_unityTab"></local:UnityModControl>
+                </Grid>
             </TabItem>
             <TabItem Header="Visualizer" Padding="10, 3, 10, 3">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"></RowDefinition>
-                </Grid.RowDefinitions>
-                <local:VisualizerControl x:Name="_graphTab"></local:VisualizerControl>
-    </Grid>
-    </TabItem>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <local:VisualizerControl x:Name="_graphTab"></local:VisualizerControl>
+                </Grid>
+            </TabItem>
             <TabItem Header="About" Padding="10, 3, 10, 3">
             </TabItem>
         </TabControl>

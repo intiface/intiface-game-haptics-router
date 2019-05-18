@@ -27,7 +27,7 @@
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="auto"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <Slider x:Name="multiplierSlider" Foreground="Black" Grid.Column="0" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" TickPlacement="BottomRight" ValueChanged="multiplierSlider_ValueChanged" Value="1" Maximum="5" TickFrequency="0.1" IsSnapToTickEnabled="True" Margin="0,2,0,1.667"/>
+                    <Slider x:Name="multiplierSlider" Foreground="Black" Grid.Column="0" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" TickPlacement="BottomRight" Value="1" Maximum="5" TickFrequency="0.1" IsSnapToTickEnabled="True" Margin="0,2,0,1.667"/>
                     <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding ElementName=multiplierSlider, Path=Value, StringFormat='x\{0:0.0\}'}" Height="16" Margin="15.333,0,14,0.333" Width="auto"></TextBlock>
                 </Grid>
             </GroupBox>
@@ -37,7 +37,7 @@
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="auto"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <Slider x:Name="baselineSlider" Foreground="Black" Grid.Column="0" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" TickPlacement="BottomRight" ValueChanged="baselineSlider_ValueChanged" Value="0" Maximum="1" TickFrequency="0.02" IsSnapToTickEnabled="True" Margin="0,2,0,1.667"/>
+                    <Slider x:Name="baselineSlider" Foreground="Black" Grid.Column="0" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" TickPlacement="BottomRight" Value="0" Maximum="1" TickFrequency="0.02" IsSnapToTickEnabled="True" Margin="0,2,0,1.667"/>
                     <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding ElementName=baselineSlider, Path=Value, StringFormat='P0'}" Height="16" Margin="15.333,0,14,0.333" Width="auto"></TextBlock>
                 </Grid>
             </GroupBox>

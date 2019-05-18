@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Net.Mime;
+using System.Net;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Controls;
 using Buttplug.Client;
 using Buttplug.Client.Connectors;
+using Buttplug.Core.Messages;
+using GVRInterface;
 
 namespace IntifaceGameVibrationRouter
 {
@@ -44,12 +47,20 @@ namespace IntifaceGameVibrationRouter
         public EventHandler Disconnected;
         public bool IsConnected => _client.Connected;
 
+        private Vibration _lastVibration = new Vibration();
+        private Vibration _lastSentVibration = new Vibration();
+        private bool _speedNeedsRecalc = false;
+        private Timer commandTimer;
+
         public IntifaceControl()
         {
             InitializeComponent();
             DeviceListBox.ItemsSource = DevicesList;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12;
             _connectTask = new Task(async () => await ConnectTask());
             _connectTask.Start();
+            commandTimer = new Timer { Interval = 50, AutoReset = true };
+            commandTimer.Elapsed += OnVibrationTimer;
         }
 
         public async Task ConnectTask()
@@ -112,7 +123,7 @@ namespace IntifaceGameVibrationRouter
 
         public void OnDeviceAdded(object aObj, DeviceAddedEventArgs aArgs)
         {
-            Dispatcher.Invoke(() => { DevicesList.Add(new CheckedListItem(aArgs.Device)); }); 
+            Dispatcher.Invoke(() => { DevicesList.Add(new CheckedListItem(aArgs.Device)); });
         }
 
         public void OnDeviceRemoved(object aObj, DeviceRemovedEventArgs aArgs)
@@ -134,6 +145,51 @@ namespace IntifaceGameVibrationRouter
         public void OnLogMessage(object aObj, LogEventArgs aArgs)
         {
 
+        }
+
+        private async void OnVibrationTimer(object aObj, ElapsedEventArgs e)
+        {
+            if (_lastVibration == _lastSentVibration && !_speedNeedsRecalc)
+            {
+                return;
+            }
+
+            await Dispatcher.Invoke(async () =>
+            {
+                foreach (var device in _devices)
+                {
+                    if (device.AllowedMessages.ContainsKey(typeof(VibrateCmd)))
+                    {
+                        try
+                        {
+                            var attrs = device.AllowedMessages[typeof(VibrateCmd)];
+                            var vibeCount = attrs.FeatureCount ?? 0;
+                            List<VibrateCmd.VibrateSubcommand> vibratorSettings = new List<VibrateCmd.VibrateSubcommand>();
+
+                            var averageVibeSpeed = (_lastVibration.LeftMotorSpeed + _lastVibration.RightMotorSpeed) / (2.0 * 65535.0);
+
+                            // Calculate the vibe speed by first adding the multiplier to the averaged speed 
+                            // Then check if it's above the baseline, if not default to the baseline
+                            // If it is then make sure we don't go above 1.0 speed or things start breaking
+                            //var vibeSpeed = Math.Min(Math.Max(averageVibeSpeed * _vibrationMultiplier, _vibrationBaseline), 1.0);
+                            var vibeSpeed = 0;
+                            for (var i = 0; i < vibeCount; i++)
+                            {
+                                vibratorSettings.Add(new VibrateCmd.VibrateSubcommand((uint)i, vibeSpeed));
+                            }
+
+                            //await _bpServer.SendMessage(new VibrateCmd(device.Index, vibratorSettings));
+                        }
+                        catch (Exception ex)
+                        {
+                            //_log.Error(ex);
+                        }
+                    }
+                }
+            });
+
+            _speedNeedsRecalc = false;
+            _lastSentVibration = _lastVibration;
         }
     }
 }

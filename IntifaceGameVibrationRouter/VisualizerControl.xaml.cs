@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using LiveCharts;
@@ -14,6 +15,23 @@ namespace IntifaceGameVibrationRouter
     {
         private readonly ChartValues<double> HighPowerValues;
         private readonly ChartValues<double> LowPowerValues;
+        private uint CurrentLeftMotorSpeed;
+        private uint CurrentRightMotorSpeed;
+        private Timer runTimer;
+
+        // Both of these members need to be public, otherwise
+        // livecharts can't see them to chart them.
+        // ReSharper disable once MemberCanBePrivate.Global
+        public SeriesCollection LowPowerSeriesCollection { get; set; }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public SeriesCollection HighPowerSeriesCollection { get; set; }
+        public event EventHandler<double> MultiplierChanged;
+        public event EventHandler<double> BaselineChanged;
+        public event EventHandler<bool> PassthruChanged;
+
+        public double Multiplier => multiplierSlider.Value;
+        public double Baseline => baselineSlider.Value;
 
         public VisualizerControl()
         {
@@ -52,22 +70,30 @@ namespace IntifaceGameVibrationRouter
                 HighPowerChart.UpdaterState = UpdaterState.Paused;
                 LowPowerChart.UpdaterState = UpdaterState.Paused;
             });
+            runTimer = new Timer { Interval = 100, AutoReset = true };
+            runTimer.Elapsed += AddPoint;
         }
 
-        /// <summary>
-        ///     Interaction logic for VibrationGraphTab.xaml
-        /// </summary>
+        public void StartUpdates()
+        {
+            runTimer.Start();
+        }
 
-        // Both of these members need to be public, otherwise
-        // livecharts can't see them to chart them.
-        // ReSharper disable once MemberCanBePrivate.Global
-        public SeriesCollection LowPowerSeriesCollection { get; set; }
+        public void StopUpdates()
+        {
+            runTimer.Stop();
+        }
 
-        // ReSharper disable once MemberCanBePrivate.Global
-        public SeriesCollection HighPowerSeriesCollection { get; set; }
-        public event EventHandler<double> MultiplierChanged;
-        public event EventHandler<double> BaselineChanged;
-        public event EventHandler<bool> PassthruChanged;
+        public void AddPoint(object o, ElapsedEventArgs e)
+        {
+            AddVibrationValue(CurrentLeftMotorSpeed, CurrentRightMotorSpeed);
+        }
+
+        public void UpdateVibrationValues(uint aLeftMotor, uint aRightMotor)
+        {
+            CurrentLeftMotorSpeed = aLeftMotor;
+            CurrentRightMotorSpeed = aRightMotor;
+        }
 
         public void AddVibrationValue(double aLowPower, double aHighPower)
         {
@@ -93,16 +119,6 @@ namespace IntifaceGameVibrationRouter
         private void PassthruCheckBox_Changed(object aSender, RoutedEventArgs aArgs)
         {
             PassthruChanged?.Invoke(this, PassthruCheckBox.IsChecked.Value);
-        }
-
-        private void multiplierSlider_ValueChanged(object aSender, RoutedPropertyChangedEventArgs<double> aArgs)
-        {
-            MultiplierChanged?.Invoke(this, aArgs.NewValue);
-        }
-
-        private void baselineSlider_ValueChanged(object aSender, RoutedPropertyChangedEventArgs<double> aArgs)
-        {
-            BaselineChanged?.Invoke(this, aArgs.NewValue);
         }
     }
 }
