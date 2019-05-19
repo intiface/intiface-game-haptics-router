@@ -4,13 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
-using Buttplug.Core.Logging;
 using Microsoft.Win32;
-using NLog;
-using NLog.Config;
-using NLog.Targets;
 
 namespace IntifaceGameVibrationRouter
 {
@@ -28,11 +23,11 @@ namespace IntifaceGameVibrationRouter
     public partial class LogControl : UserControl
     {
         private readonly LogList _logs;
-        private LoggingRule _outgoingLoggingRule;
+        //private LoggingRule _outgoingLoggingRule;
 
         public LogControl()
         {
-            var c = LogManager.Configuration ?? new LoggingConfiguration();
+            //var c = LogManager.Configuration ?? new LoggingConfiguration();
             _logs = new LogList();
 
             InitializeComponent();
