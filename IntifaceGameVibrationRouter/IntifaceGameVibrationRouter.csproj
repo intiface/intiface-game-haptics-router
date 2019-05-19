@@ -202,6 +202,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\dependencies\SharpMonoInjector\src\SharpMonoInjector\SharpMonoInjector.csproj">
+      <Project>{b72b6502-e1b3-421a-b723-b294bf5f9e6b}</Project>
+      <Name>SharpMonoInjector</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GVRInterface\GVRInterface.csproj">
       <Project>{96ebcd5e-a218-4ddc-a8be-83e9369f5465}</Project>
       <Name>GVRInterface</Name>
