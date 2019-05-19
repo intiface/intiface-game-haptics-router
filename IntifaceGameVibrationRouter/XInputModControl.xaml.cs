@@ -10,8 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Buttplug.Logging;
 using EasyHook;
-using GVRInterface;
-using GVRPayload;
 using SharpMonoInjector;
 
 namespace IntifaceGameVibrationRouter
@@ -116,9 +114,9 @@ namespace IntifaceGameVibrationRouter
             ProcessListBox.SelectionChanged += OnSelectionChanged;
 
             //GameVibrationRouterInterface.VibrationCommandReceived += OnVibrationCommand;
-            GameVibrationRouterInterface.VibrationPingMessageReceived += OnVibrationPingMessage;
-            GameVibrationRouterInterface.VibrationExceptionReceived += OnVibrationException;
-            GameVibrationRouterInterface.VibrationExitReceived += OnVibrationExit;
+            GVRXInputModInterface.GVRXInputModInterface.VibrationPingMessageReceived += OnVibrationPingMessage;
+            GVRXInputModInterface.GVRXInputModInterface.VibrationExceptionReceived += OnVibrationException;
+            GVRXInputModInterface.GVRXInputModInterface.VibrationExitReceived += OnVibrationExit;
             RunEnumProcessUpdate();
         }
 
@@ -237,11 +235,11 @@ namespace IntifaceGameVibrationRouter
         {
             try
             {
-                _xinputHookServer = RemoteHooking.IpcCreateServer<GameVibrationRouterInterface>(
+                _xinputHookServer = RemoteHooking.IpcCreateServer<GVRXInputModInterface.GVRXInputModInterface>(
                     ref _channelName,
                     WellKnownObjectMode.Singleton);
                 var dllFile = System.IO.Path.Combine(
-                    System.IO.Path.GetDirectoryName(typeof(GameVibrationRouterPayload).Assembly.Location),
+                    System.IO.Path.GetDirectoryName(typeof(GVRXInputModPayload.GVRXInputModPayload).Assembly.Location),
                     "GVRPayload.dll");
                 /*
                 _log.Info($"Beginning process injection on {aProcessId}...");
@@ -292,7 +290,7 @@ namespace IntifaceGameVibrationRouter
 
         private void Detach()
         {
-            GameVibrationRouterInterface.Detach();
+            GVRXInputModInterface.GVRXInputModInterface.Detach();
             Attached = false;
             _channelName = null;
             _xinputHookServer = null;

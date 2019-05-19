@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Timers;
 
-namespace GVRInterface
+namespace GVRXInputModInterface
 {
     [Serializable]
 #pragma warning disable CS0660 // Type defines operator == or operator != but does not override Object.Equals(object o)
@@ -25,8 +25,7 @@ namespace GVRInterface
         }
     }
 
-
-    public class GameVibrationRouterInterface : MarshalByRefObject
+    public class GVRXInputModInterface : MarshalByRefObject
     {
         // This will be used as a singleton in the IPC Server, and we should only ever have one process hooked 
         // with this interface. Just make the EventHandler static so we can attach as needed from anywhere.
@@ -39,7 +38,7 @@ namespace GVRInterface
         private Timer _exitTimer = new Timer();
         public static bool _shouldPassthru = true;
         private bool _hasPinged;
-        public GameVibrationRouterInterface()
+        public GVRXInputModInterface()
         {
             // Every time we create a new instance, reset the static stopping variable.
             _shouldStop = false;

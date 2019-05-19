@@ -10,7 +10,7 @@ using Buttplug.Client;
 using Buttplug.Client.Connectors;
 using Buttplug.Core.Logging;
 using Buttplug.Core.Messages;
-using GVRInterface;
+using GVRXInputModInterface;
 
 namespace IntifaceGameVibrationRouter
 {

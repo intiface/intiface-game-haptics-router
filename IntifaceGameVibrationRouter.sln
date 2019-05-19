@@ -5,11 +5,12 @@ VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntifaceGameVibrationRouter", "IntifaceGameVibrationRouter\IntifaceGameVibrationRouter.csproj", "{E77C7F6F-1476-43B9-8F22-A2C907374EA4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GVRInterface", "GVRInterface\GVRInterface.csproj", "{96EBCD5E-A218-4DDC-A8BE-83E9369F5465}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GVRPayload", "GVRPayload\GVRPayload.csproj", "{075F928F-747E-48DC-BA88-1F2AF099389F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpMonoInjector", "dependencies\SharpMonoInjector\src\SharpMonoInjector\SharpMonoInjector.csproj", "{B72B6502-E1B3-421A-B723-B294BF5F9E6B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GVRXInputModPayload", "GVRXInputModPayload\GVRXInputModPayload.csproj", "{075F928F-747E-48DC-BA88-1F2AF099389F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GVRXInputModInterface", "GVRXInputModInterface\GVRXInputModInterface.csproj", "{96EBCD5E-A218-4DDC-A8BE-83E9369F5465}"
+EndProject
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

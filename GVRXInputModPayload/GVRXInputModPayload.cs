@@ -3,19 +3,19 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
-using GVRInterface;
+using GVRXInputModInterface;
 
-namespace GVRPayload
+namespace GVRXInputModPayload
 {
-    public class GameVibrationRouterPayload : IEntryPoint
+    public class GVRXInputModPayload : IEntryPoint
     {
-        private readonly GameVibrationRouterInterface _interface;
+        private readonly GVRXInputModInterface.GVRXInputModInterface _interface;
         private LocalHook _xinputSetStateHookObj;
         private Vibration _lastMessage = new Vibration { LeftMotorSpeed = 65535, RightMotorSpeed = 65535 };
         private static bool _shouldPassthru = true;
         private readonly Queue<Vibration> _messageQueue = new Queue<Vibration>();
         private static Exception _ex;
-        private static GameVibrationRouterPayload _instance;
+        private static GVRXInputModPayload _instance;
 
         // Search newest to oldest. It seems that some games link both xinput1_4 and xinput9_1_0, but seem to 
         // prefer xinput9_1_0? Not quite sure about difference yet. 
@@ -28,11 +28,11 @@ namespace GVRPayload
 
         private static XInputVersion _hookedVersion;
 
-        public GameVibrationRouterPayload(
+        public GVRXInputModPayload(
             RemoteHooking.IContext aInContext,
             String aInChannelName)
         {
-            _interface = RemoteHooking.IpcConnectClient<GameVibrationRouterInterface>(aInChannelName);
+            _interface = RemoteHooking.IpcConnectClient<GVRXInputModInterface.GVRXInputModInterface>(aInChannelName);
             _instance = this;
         }
 
@@ -133,7 +133,7 @@ namespace GVRPayload
                     XInputSetStateShim(aGamePadIndex, aVibrationRef);
                 }
 
-                GameVibrationRouterPayload This = _instance;
+                GVRXInputModPayload This = _instance;
                 // No reason to send duplicate packets.
                 if (This._lastMessage.LeftMotorSpeed == aVibrationRef.LeftMotorSpeed &&
                     This._lastMessage.RightMotorSpeed == aVibrationRef.RightMotorSpeed)

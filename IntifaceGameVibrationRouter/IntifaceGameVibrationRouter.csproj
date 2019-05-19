@@ -204,13 +204,13 @@
       <Project>{b72b6502-e1b3-421a-b723-b294bf5f9e6b}</Project>
       <Name>SharpMonoInjector</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GVRInterface\GVRInterface.csproj">
+    <ProjectReference Include="..\GVRXInputModInterface\GVRXInputModInterface.csproj">
       <Project>{96ebcd5e-a218-4ddc-a8be-83e9369f5465}</Project>
-      <Name>GVRInterface</Name>
+      <Name>GVRXInputModInterface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GVRPayload\GVRPayload.csproj">
+    <ProjectReference Include="..\GVRXInputModPayload\GVRXInputModPayload.csproj">
       <Project>{075f928f-747e-48dc-ba88-1f2af099389f}</Project>
-      <Name>GVRPayload</Name>
+      <Name>GVRXInputModPayload</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
