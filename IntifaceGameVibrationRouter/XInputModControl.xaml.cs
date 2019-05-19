@@ -3,13 +3,16 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels.Ipc;
+using System.Text;
 using System.Threading.Tasks;
 using Buttplug.Logging;
 using EasyHook;
 using GVRInterface;
 using GVRPayload;
+using SharpMonoInjector;
 
 namespace IntifaceGameVibrationRouter
 {
@@ -24,17 +27,54 @@ namespace IntifaceGameVibrationRouter
     {
         private IpcServerChannel _xinputHookServer;
         private string _channelName;
+        public EventHandler<GVRProtocolMessage> GvrProtocolMessageHandler;
+
+        public static bool IsXInputModule(IntPtr handle)
+        {
+            int size = ProcessUtils.Is64BitProcess(handle) ? 8 : 4;
+
+            IntPtr[] ptrs = new IntPtr[0];
+
+            if (!Native.EnumProcessModulesEx(
+                handle, ptrs, 0, out int bytesNeeded, ModuleFilter.LIST_MODULES_ALL))
+            {
+                throw new InjectorException("Failed to enumerate process modules", new Win32Exception(Marshal.GetLastWin32Error()));
+            }
+
+            int count = bytesNeeded / size;
+            ptrs = new IntPtr[count];
+
+            if (!Native.EnumProcessModulesEx(
+                handle, ptrs, bytesNeeded, out bytesNeeded, ModuleFilter.LIST_MODULES_ALL))
+            {
+                throw new InjectorException("Failed to enumerate process modules", new Win32Exception(Marshal.GetLastWin32Error()));
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                StringBuilder path = new StringBuilder(260);
+                Native.GetModuleFileNameEx(handle, ptrs[i], path, 260);
+
+                if (path.ToString().IndexOf("xinput", StringComparison.OrdinalIgnoreCase) > -1)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         public class ProcessInfo
         {
-            public String FileName;
-            public Int32 Id;
-            public String Owner;
+            public string FileName;
+            public int Id;
+            public string Owner;
+            public IntPtr MonoModule = IntPtr.Zero;
 
             public override string ToString()
             {
                 var f = System.IO.Path.GetFileNameWithoutExtension(FileName);
-                return $"{f} ({Id})";
+                return $"{f} ({Id}) ({(MonoModule != IntPtr.Zero ? "Mono" : "XInput")})";
             }
         }
 
@@ -95,26 +135,61 @@ namespace IntifaceGameVibrationRouter
         private void EnumProcesses()
         {
             Dispatcher.Invoke(() => { _processList.Clear(); });
+            Dispatcher.Invoke(() => { ProcessError = "Scanning Processes..."; });
+            var cp = Process.GetCurrentProcess().Id;
             foreach (var currentProc in from proc in Process.GetProcesses() orderby proc.ProcessName select proc)
             {
                 try
                 {
                     // This can sometimes happen between calling GetProcesses and getting here. Save ourselves the throw.
-                    if (currentProc.HasExited)
+                    if (currentProc.HasExited || currentProc.Id == cp)
                     {
                         continue;
                     }
                     // This is usually what throws, so do it before we invoke via dispatcher.
                     var owner = RemoteHooking.GetProcessIdentity(currentProc.Id).Name;
-                    Dispatcher.Invoke(() =>
+                    const ProcessAccessRights flags = ProcessAccessRights.PROCESS_QUERY_INFORMATION | ProcessAccessRights.PROCESS_VM_READ;
+                    IntPtr handle;
+
+                    if ((handle = Native.OpenProcess(flags, false, currentProc.Id)) != IntPtr.Zero)
                     {
-                        _processList.Add(new ProcessInfo
+                        if (IsXInputModule(handle))
                         {
-                            FileName = currentProc.ProcessName,
-                            Id = currentProc.Id,
-                            Owner = owner
-                        });
-                    });
+                            Dispatcher.Invoke(() =>
+                            {
+                                _processList.Add(new ProcessInfo
+                                {
+                                    FileName = currentProc.ProcessName,
+                                    Id = currentProc.Id,
+                                    Owner = owner
+                                });
+                            });
+                        }
+                        try
+                        {
+                            if (ProcessUtils.GetMonoModule(handle, out IntPtr module))
+                            {
+                                Dispatcher.Invoke(() =>
+                                {
+                                    _processList.Add(new ProcessInfo
+                                    {
+                                        FileName = currentProc.ProcessName,
+                                        Id = currentProc.Id,
+                                        Owner = owner,
+                                        MonoModule = module,
+                                    });
+                                });
+                            }
+                        }
+                        catch (InjectorException ex)
+                        {
+
+                        }
+                        finally
+                        {
+                            Native.CloseHandle(handle);
+                        }
+                    }
                 }
                 catch (AccessViolationException)
                 {
@@ -129,7 +204,7 @@ namespace IntifaceGameVibrationRouter
                     // _log.Error(aEx);
                 }
             }
-
+            Dispatcher.Invoke(() => { ProcessError = "Select Process to Inject"; });
             _enumProcessTask = null;
         }
 
