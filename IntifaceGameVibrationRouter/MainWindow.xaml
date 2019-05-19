@@ -32,7 +32,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
-                    <local:IntifaceControl></local:IntifaceControl>
+                    <local:IntifaceControl x:Name="_intifaceTab"></local:IntifaceControl>
                 </Grid>
             </TabItem>
             <TabItem Header="GVR - XInput" Padding="10, 3, 10, 3">
@@ -43,7 +43,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
-                    <local:XInputModControl x:Name="_processTab"></local:XInputModControl>
+                    <local:XInputModControl x:Name="_xinputTab"></local:XInputModControl>
                 </Grid>
             </TabItem>
             <TabItem Header="GVR - Mod" Padding="10, 3, 10, 3">
@@ -66,6 +66,17 @@
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
                     <local:VisualizerControl x:Name="_graphTab"></local:VisualizerControl>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Logs" Padding="10, 3, 10, 3">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <local:LogControl x:Name="_logTab"></local:LogControl>
                 </Grid>
             </TabItem>
             <TabItem Header="About" Padding="10, 3, 10, 3">

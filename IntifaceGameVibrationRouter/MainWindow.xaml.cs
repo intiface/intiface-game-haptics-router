@@ -24,12 +24,35 @@ namespace IntifaceGameVibrationRouter
                 return;
             }
 
+            _intifaceTab.LogMessageHandler += OnLogMessage;
+            _xinputTab.GvrProtocolMessageHandler += OnGVRMessageReceived;
             //_graphTab.PassthruChanged += PassthruChanged;
         }
 
-        protected async void OnGVRMessageReceived(object aObj, EventHandler<GVRProtocolMessage> aMsg)
+        protected void OnLogMessage(object aObj, string aMsg)
         {
+            _logTab.AddLogMessage(aMsg);
+        }
 
+        protected async void OnGVRMessageReceived(object aObj, GVRProtocolMessage aMsg)
+        {
+            switch (aMsg)
+            {
+                case Log l:
+                    _logTab.AddLogMessage(l.Message);
+                    break;
+                case Ping p:
+                    break;
+                case XInputHaptics x:
+                    break;
+                case UnityXRViveHaptics x:
+                    break;
+                case UnityXROculusClipHaptics x:
+                    break;
+                case UnityXROculusInputHaptics x:
+                    break;
+            }
+            
         }
     }
 }
