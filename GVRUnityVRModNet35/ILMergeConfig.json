@@ -1,0 +1,31 @@
+{
+  "General": {
+    "OutputFile": null,
+    "TargetPlatform": "v2,C:\\Windows\\Microsoft.NET\\Framework\\v2.0.50727",
+    "KeyFile": null,
+    "AlternativeILMergePath": null,
+    "InputAssemblies": []
+  },
+  "Advanced": {
+    "AllowDuplicateType": null,
+    "AllowMultipleAssemblyLevelAttributes": false,
+    "AllowWildCards": false,
+    "AllowZeroPeKind": false,
+    "AttributeFile": null,
+    "Closed": false,
+    "CopyAttributes": false,
+    "DebugInfo": true,
+    "DelaySign": false,
+    "ExcludeFile": "",
+    "FileAlignment": 512,
+    "Internalize": false,
+    "Log": false,
+    "LogFile": null,
+    "PublicKeyTokens": true,
+    "SearchDirectories": [],
+    "TargetKind": null,
+    "UnionMerge": false,
+    "Version": null,
+    "XmlDocumentation": false
+  }
+}
