@@ -8,6 +8,7 @@ using System.Timers;
 using System.Windows.Controls;
 using Buttplug.Client;
 using Buttplug.Client.Connectors;
+using Buttplug.Core.Logging;
 using Buttplug.Core.Messages;
 using GVRInterface;
 
@@ -43,8 +44,9 @@ namespace IntifaceGameVibrationRouter
         private Task _connectTask;
         private bool _quitting;
 
-        public EventHandler Connected;
-        public EventHandler Disconnected;
+        public EventHandler ConnectedHandler;
+        public EventHandler DisconnectedHandler;
+        public EventHandler<string> LogMessageHandler;
         public bool IsConnected => _client.Connected;
 
         private Vibration _lastVibration = new Vibration();
@@ -81,10 +83,14 @@ namespace IntifaceGameVibrationRouter
                     ipcClient.Log += OnLogMessage;
                     ipcClient.ServerDisconnect += OnDisconnect;
                     await ipcClient.ConnectAsync();
+                    await ipcClient.RequestLogAsync(ButtplugLogLevel.Debug);
                     _client = ipcClient;
-                    Dispatcher.Invoke(() => { Connected?.Invoke(this, new EventArgs()); });
-                    Dispatcher.Invoke(() => { ConnectionStatus.Content = "Connected"; });
-                    await _client.StartScanningAsync();
+                    await Dispatcher.Invoke(async () =>
+                    {
+                        ConnectedHandler?.Invoke(this, new EventArgs());
+                        ConnectionStatus.Content = "Connected";
+                        await StartScanning();
+                    });
                     break;
                 }
                 catch (ButtplugClientConnectorException)
@@ -119,6 +125,8 @@ namespace IntifaceGameVibrationRouter
         {
             _connectTask = new Task(async () => await ConnectTask());
             _connectTask.Start();
+            _devices.Clear();
+            _client = null;
         }
 
         public void OnDeviceAdded(object aObj, DeviceAddedEventArgs aArgs)
@@ -144,7 +152,7 @@ namespace IntifaceGameVibrationRouter
 
         public void OnLogMessage(object aObj, LogEventArgs aArgs)
         {
-
+            Dispatcher.Invoke(() => { LogMessageHandler?.Invoke(this, aArgs.Message.LogMessage); });
         }
 
         private async void OnVibrationTimer(object aObj, ElapsedEventArgs e)
