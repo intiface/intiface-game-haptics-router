@@ -125,9 +125,7 @@
     <Compile Include="LogControl.xaml.cs">
       <DependentUpon>LogControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UnityModControl.xaml.cs">
-      <DependentUpon>UnityModControl.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="UnityVRMod.cs" />
     <Compile Include="VisualizerControl.xaml.cs">
       <DependentUpon>VisualizerControl.xaml</DependentUpon>
     </Compile>
@@ -154,11 +152,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="XInputModControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UnityModControl.xaml">
+    <Page Include="ModControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -168,8 +162,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="XInputModControl.xaml.cs">
-      <DependentUpon>XInputModControl.xaml</DependentUpon>
+    <Compile Include="XInputMod.cs" />
+    <Compile Include="ModControl.xaml.cs">
+      <DependentUpon>ModControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

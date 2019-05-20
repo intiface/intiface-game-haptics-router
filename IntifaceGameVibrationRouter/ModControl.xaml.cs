@@ -21,46 +21,9 @@ namespace IntifaceGameVibrationRouter
     /// Interaction logic for UserControl1.xaml
     /// </summary>
 
-    public partial class XInputModControl
+    public partial class ModControl
     {
-        private IpcServerChannel _xinputHookServer;
-        private string _channelName;
         public EventHandler<GVRProtocolMessage> GvrProtocolMessageHandler;
-
-        public static bool IsXInputModule(IntPtr handle)
-        {
-            int size = ProcessUtils.Is64BitProcess(handle) ? 8 : 4;
-
-            IntPtr[] ptrs = new IntPtr[0];
-
-            if (!Native.EnumProcessModulesEx(
-                handle, ptrs, 0, out int bytesNeeded, ModuleFilter.LIST_MODULES_ALL))
-            {
-                throw new InjectorException("Failed to enumerate process modules", new Win32Exception(Marshal.GetLastWin32Error()));
-            }
-
-            int count = bytesNeeded / size;
-            ptrs = new IntPtr[count];
-
-            if (!Native.EnumProcessModulesEx(
-                handle, ptrs, bytesNeeded, out bytesNeeded, ModuleFilter.LIST_MODULES_ALL))
-            {
-                throw new InjectorException("Failed to enumerate process modules", new Win32Exception(Marshal.GetLastWin32Error()));
-            }
-
-            for (int i = 0; i < count; i++)
-            {
-                StringBuilder path = new StringBuilder(260);
-                Native.GetModuleFileNameEx(handle, ptrs[i], path, 260);
-
-                if (path.ToString().IndexOf("xinput", StringComparison.OrdinalIgnoreCase) > -1)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
 
         public class ProcessInfo
         {
@@ -107,7 +70,7 @@ namespace IntifaceGameVibrationRouter
         private readonly Logger _log;
         private Task _enumProcessTask;
 
-        public XInputModControl()
+        public ModControl()
         {
             InitializeComponent();
             ProcessListBox.ItemsSource = _processList;
@@ -137,56 +100,47 @@ namespace IntifaceGameVibrationRouter
             var cp = Process.GetCurrentProcess().Id;
             foreach (var currentProc in from proc in Process.GetProcesses() orderby proc.ProcessName select proc)
             {
+                var handle = IntPtr.Zero;
+                // This can sometimes happen between calling GetProcesses and getting here. Save ourselves the throw.
+                if (currentProc.HasExited || currentProc.Id == cp)
+                {
+                    continue;
+                }
+                const ProcessAccessRights flags = ProcessAccessRights.PROCESS_QUERY_INFORMATION | ProcessAccessRights.PROCESS_VM_READ;
+
                 try
                 {
-                    // This can sometimes happen between calling GetProcesses and getting here. Save ourselves the throw.
-                    if (currentProc.HasExited || currentProc.Id == cp)
+                    // This is usually what throws, so do it before we invoke via dispatcher.
+                    var owner = RemoteHooking.GetProcessIdentity(currentProc.Id).Name;
+
+                    if ((handle = Native.OpenProcess(flags, false, currentProc.Id)) == IntPtr.Zero)
                     {
                         continue;
                     }
-                    // This is usually what throws, so do it before we invoke via dispatcher.
-                    var owner = RemoteHooking.GetProcessIdentity(currentProc.Id).Name;
-                    const ProcessAccessRights flags = ProcessAccessRights.PROCESS_QUERY_INFORMATION | ProcessAccessRights.PROCESS_VM_READ;
-                    IntPtr handle;
-
-                    if ((handle = Native.OpenProcess(flags, false, currentProc.Id)) != IntPtr.Zero)
+                    if (XInputMod.CanUseMod(handle))
                     {
-                        if (IsXInputModule(handle))
+                        Dispatcher.Invoke(() =>
                         {
-                            Dispatcher.Invoke(() =>
+                            _processList.Add(new ProcessInfo
                             {
-                                _processList.Add(new ProcessInfo
-                                {
-                                    FileName = currentProc.ProcessName,
-                                    Id = currentProc.Id,
-                                    Owner = owner
-                                });
+                                FileName = currentProc.ProcessName,
+                                Id = currentProc.Id,
+                                Owner = owner
                             });
-                        }
-                        try
+                        });
+                    }
+                    if (UnityVRMod.CanUseMod(handle, out var module))
+                    {
+                        Dispatcher.Invoke(() =>
                         {
-                            if (ProcessUtils.GetMonoModule(handle, out IntPtr module))
+                            _processList.Add(new ProcessInfo
                             {
-                                Dispatcher.Invoke(() =>
-                                {
-                                    _processList.Add(new ProcessInfo
-                                    {
-                                        FileName = currentProc.ProcessName,
-                                        Id = currentProc.Id,
-                                        Owner = owner,
-                                        MonoModule = module,
-                                    });
-                                });
-                            }
-                        }
-                        catch (InjectorException ex)
-                        {
-
-                        }
-                        finally
-                        {
-                            Native.CloseHandle(handle);
-                        }
+                                FileName = currentProc.ProcessName,
+                                Id = currentProc.Id,
+                                Owner = owner,
+                                MonoModule = module,
+                            });
+                        });
                     }
                 }
                 catch (AccessViolationException)
@@ -200,6 +154,13 @@ namespace IntifaceGameVibrationRouter
                 catch (Exception aEx)
                 {
                     // _log.Error(aEx);
+                }
+                finally
+                {
+                    if (handle != IntPtr.Zero)
+                    {
+                        Native.CloseHandle(handle);
+                    }
                 }
             }
             Dispatcher.Invoke(() => { ProcessError = "Select Process to Inject"; });
@@ -218,7 +179,7 @@ namespace IntifaceGameVibrationRouter
             if (!_attached)
             {
                 var process = ProcessListBox.SelectedItems.Cast<ProcessInfo>().ToList();
-                Attach(process[0].Id);
+                //Attach(process[0].Id);
             }
             else
             {
@@ -229,39 +190,6 @@ namespace IntifaceGameVibrationRouter
         private void RefreshButton_Click(object aObj, System.Windows.RoutedEventArgs aEvent)
         {
             RunEnumProcessUpdate();
-        }
-
-        private void Attach(int aProcessId)
-        {
-            try
-            {
-                _xinputHookServer = RemoteHooking.IpcCreateServer<GVRXInputModInterface.GVRXInputModInterface>(
-                    ref _channelName,
-                    WellKnownObjectMode.Singleton);
-                var dllFile = System.IO.Path.Combine(
-                    System.IO.Path.GetDirectoryName(typeof(GVRXInputModPayload.GVRXInputModPayload).Assembly.Location),
-                    "GVRPayload.dll");
-                /*
-                _log.Info($"Beginning process injection on {aProcessId}...");
-                _log.Info($"Injecting DLL {dllFile}");
-                */
-                RemoteHooking.Inject(
-                    aProcessId,
-                    InjectionOptions.Default,
-                    dllFile,
-                    dllFile,
-                    // the optional parameter list...
-                    _channelName);
-                //_log.Info($"Finished process injection on {aProcessId}...");
-                Attached = true;
-                ProcessError = "Attached to process";
-            }
-            catch (Exception ex)
-            {
-                Detach();
-                //_log.Error(ex);
-                ProcessError = "Error attaching, see logs for details.";
-            }
         }
 
         private void OnVibrationException(object aObj, Exception aEx)
@@ -292,8 +220,6 @@ namespace IntifaceGameVibrationRouter
         {
             GVRXInputModInterface.GVRXInputModInterface.Detach();
             Attached = false;
-            _channelName = null;
-            _xinputHookServer = null;
         }
     }
 }

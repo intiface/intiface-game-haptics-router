@@ -25,7 +25,7 @@ namespace IntifaceGameVibrationRouter
             }
 
             _intifaceTab.LogMessageHandler += OnLogMessage;
-            _xinputTab.GvrProtocolMessageHandler += OnGVRMessageReceived;
+            _modTab.GvrProtocolMessageHandler += OnGVRMessageReceived;
             //_graphTab.PassthruChanged += PassthruChanged;
         }
 

@@ -1,20 +1,42 @@
-﻿using System.IO.Pipes;
+﻿using System;
+using System.Collections.Generic;
+using System.IO.Pipes;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Controls;
+using System.Windows.Threading;
+using EasyHook;
+using SharpMonoInjector;
 
 namespace IntifaceGameVibrationRouter
 {
-    /// <summary>
-    /// Interaction logic for UnityModControl.xaml
-    /// </summary>
-    public partial class UnityModControl : UserControl
+    class UnityVRMod
     {
+        public static bool CanUseMod(IntPtr handle, out IntPtr module)
+        {
+            try
+            {
+                return ProcessUtils.GetMonoModule(handle, out module);
+            }
+            catch (InjectorException ex)
+            {
+                // Noop and just return false.
+                // TODO Maybe log here too.
+            }
+            finally
+            {
+                Native.CloseHandle(handle);
+            }
+
+            module = IntPtr.Zero;
+            return false;
+        }
+
         private Task _readerTask;
 
-        public UnityModControl()
+        public UnityVRMod()
         {
-            InitializeComponent();
+
             _readerTask = new Task(async () => await StdInReader());
             _readerTask.Start();
         }
@@ -44,7 +66,6 @@ namespace IntifaceGameVibrationRouter
                         // no-op?
                     }
                 }
-                Dispatcher.Invoke(() => { _stdInLabel.Content = msg; });
             }
         }
     }

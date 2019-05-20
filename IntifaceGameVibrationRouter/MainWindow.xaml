@@ -35,7 +35,7 @@
                     <local:IntifaceControl x:Name="_intifaceTab"></local:IntifaceControl>
                 </Grid>
             </TabItem>
-            <TabItem Header="GVR - XInput" Padding="10, 3, 10, 3">
+            <TabItem Header="Process List" Padding="10, 3, 10, 3">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -43,18 +43,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
-                    <local:XInputModControl x:Name="_xinputTab"></local:XInputModControl>
-                </Grid>
-            </TabItem>
-            <TabItem Header="GVR - Mod" Padding="10, 3, 10, 3">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <local:UnityModControl x:Name="_unityTab"></local:UnityModControl>
+                    <local:ModControl x:Name="_modTab"></local:ModControl>
                 </Grid>
             </TabItem>
             <TabItem Header="Visualizer" Padding="10, 3, 10, 3">
