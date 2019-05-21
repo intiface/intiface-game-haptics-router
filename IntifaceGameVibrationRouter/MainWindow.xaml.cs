@@ -1,7 +1,7 @@
-﻿using System;
-using System.Windows;
-using Buttplug.Logging;
-using JetBrains.Annotations;
+﻿using System.Windows;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 
 namespace IntifaceGameVibrationRouter
 {
@@ -10,11 +10,7 @@ namespace IntifaceGameVibrationRouter
     /// </summary>
     public partial class MainWindow : Window
     {
-        [NotNull]
-        private readonly Logger _log;
-
-        private double _vibrationMultiplier = 1;
-        private double _vibrationBaseline = 0;
+        private readonly NLog.Logger _log;
 
         public MainWindow()
         {
@@ -23,19 +19,30 @@ namespace IntifaceGameVibrationRouter
             {
                 return;
             }
+            _log = LogManager.GetCurrentClassLogger();
+            LogManager.Configuration = LogManager.Configuration ?? new LoggingConfiguration();
+#if DEBUG
+            // Debug Logger Setup
+            var t = new DebuggerTarget();
+            LogManager.Configuration.AddTarget("debugger", t);
+            LogManager.Configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, t));
+            LogManager.Configuration = LogManager.Configuration;
+#endif
 
             _intifaceTab.LogMessageHandler += OnLogMessage;
             _modTab.GvrProtocolMessageHandler += OnGVRMessageReceived;
             //_graphTab.PassthruChanged += PassthruChanged;
+            _log.Info("Application started.");
         }
 
         protected void OnLogMessage(object aObj, string aMsg)
         {
             _logTab.AddLogMessage(aMsg);
         }
-
-        protected async void OnGVRMessageReceived(object aObj, GVRProtocolMessage aMsg)
+        
+        protected async void OnGVRMessageReceived(object aObj, GVRProtocolMessageContainer aMsg)
         {
+            /*
             switch (aMsg)
             {
                 case Log l:
@@ -52,7 +59,7 @@ namespace IntifaceGameVibrationRouter
                 case UnityXROculusInputHaptics x:
                     break;
             }
-            
+            */
         }
     }
 }

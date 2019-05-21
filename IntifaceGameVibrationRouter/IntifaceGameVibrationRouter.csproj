@@ -84,6 +84,9 @@
     <Reference Include="NJsonSchema, Version=9.13.22.0, Culture=neutral, PublicKeyToken=c2f9c3bdfae56102, processorArchitecture=MSIL">
       <HintPath>..\packages\NJsonSchema.9.13.22\lib\net45\NJsonSchema.dll</HintPath>
     </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.6.3\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
@@ -120,8 +123,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="GVRProtocol.cs" />
-    <Compile Include="JSONParser.cs" />
-    <Compile Include="JSONWriter.cs" />
     <Compile Include="LogControl.xaml.cs">
       <DependentUpon>LogControl.xaml</DependentUpon>
     </Compile>
@@ -199,14 +200,6 @@
       <Project>{b72b6502-e1b3-421a-b723-b294bf5f9e6b}</Project>
       <Name>SharpMonoInjector</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GVRUnityVRModNet35\GVRUnityVRModNet35.csproj">
-      <Project>{deb31023-7d8f-49f0-8b06-b35bda37672d}</Project>
-      <Name>GVRUnityVRModNet35</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\GVRUnityVRModNet45\GVRUnityVRModNet45.csproj">
-      <Project>{09ed6f36-fd6b-4b16-a5c8-95f2e1339424}</Project>
-      <Name>GVRUnityVRModNet45</Name>
-    </ProjectReference>
     <ProjectReference Include="..\GVRXInputModInterface\GVRXInputModInterface.csproj">
       <Project>{96ebcd5e-a218-4ddc-a8be-83e9369f5465}</Project>
       <Name>GVRXInputModInterface</Name>
@@ -229,6 +222,14 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\GVRUnityVRModNet35\bin\Debug\ILMerge\GVRUnityVRModNet35.dll">
+      <Link>GVRUnityVRModNet35.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\GVRUnityVRModNet45\bin\Debug\ILMerge\GVRUnityVRModNet45.dll">
+      <Link>GVRUnityVRModNet45.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="EasyHook32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

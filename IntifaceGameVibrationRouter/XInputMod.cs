@@ -8,6 +8,8 @@ using System.Runtime.Remoting.Channels.Ipc;
 using System.Text;
 using System.Threading.Tasks;
 using EasyHook;
+using GVRXInputModInterface;
+using NLog;
 using SharpMonoInjector;
 
 namespace IntifaceGameVibrationRouter
@@ -16,6 +18,7 @@ namespace IntifaceGameVibrationRouter
     {
         private IpcServerChannel _xinputHookServer;
         private string _channelName;
+        private Logger _log;
 
         /// <summary>
         /// Denotes whether we can use XInput mods with this process.
@@ -58,6 +61,15 @@ namespace IntifaceGameVibrationRouter
             return false;
         }
 
+        public XInputMod()
+        {
+            _log = LogManager.GetCurrentClassLogger();
+            GVRXInputModInterface.GVRXInputModInterface.VibrationCommandReceived += OnVibrationCommand;
+            GVRXInputModInterface.GVRXInputModInterface.VibrationPingMessageReceived += OnVibrationPingMessage;
+            GVRXInputModInterface.GVRXInputModInterface.VibrationExceptionReceived += OnVibrationException;
+            GVRXInputModInterface.GVRXInputModInterface.VibrationExitReceived += OnVibrationExit;
+        }
+
         private void Attach(int aProcessId)
         {
             try
@@ -68,10 +80,10 @@ namespace IntifaceGameVibrationRouter
                 var dllFile = System.IO.Path.Combine(
                     System.IO.Path.GetDirectoryName(typeof(GVRXInputModPayload.GVRXInputModPayload).Assembly.Location),
                     "GVRXInputModPayload.dll");
-                /*
+
                 _log.Info($"Beginning process injection on {aProcessId}...");
                 _log.Info($"Injecting DLL {dllFile}");
-                */
+
                 RemoteHooking.Inject(
                     aProcessId,
                     InjectionOptions.Default,
@@ -79,12 +91,12 @@ namespace IntifaceGameVibrationRouter
                     dllFile,
                     // the optional parameter list...
                     _channelName);
-                //_log.Info($"Finished process injection on {aProcessId}...");
+                _log.Info($"Finished process injection on {aProcessId}...");
             }
             catch (Exception ex)
             {
                 Detach();
-                //_log.Error(ex);
+                _log.Error(ex);
             }
         }
 
@@ -93,6 +105,27 @@ namespace IntifaceGameVibrationRouter
             GVRXInputModInterface.GVRXInputModInterface.Detach();
             _channelName = null;
             _xinputHookServer = null;
+        }
+
+        private void OnVibrationCommand(object aObj, Vibration aVibration)
+        {
+
+        }
+
+        private void OnVibrationException(object aObj, Exception aEx)
+        {
+            _log.Error($"Remote Exception: {aEx}");
+            Detach();
+        }
+
+        private void OnVibrationPingMessage(object aObj, string aMsg)
+        {
+            _log.Info($"Remote Ping Message: {aMsg}");
+        }
+
+        private void OnVibrationExit(object aObj, bool aTrue)
+        {
+            Detach();
         }
     }
 }

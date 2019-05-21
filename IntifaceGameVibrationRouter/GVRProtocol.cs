@@ -1,57 +1,51 @@
 ﻿using System;
-using TinyJson;
+using System.IO;
+using System.Xml.Serialization;
 
 namespace IntifaceGameVibrationRouter
 {
-    public class GVRProtocolMessage
+    [Serializable]
+    public class GVRProtocolMessageContainer
     {
-        public string Type;
-
-        public GVRProtocolMessage()
+        
+        public void SendSerialized(Stream aStream)
         {
-            Type = GetType().Name;
+            // We can't use BinaryFormatter, because we're merging DLLs for the mods and the assemblies won't match. Use XML instead.
+            var _formatter = new XmlSerializer(typeof(GVRProtocolMessageContainer));
+            // TODO Should figure out a better way to do this, otherwise we're going to create a ton of formatters and clog the GC.
+            _formatter.Serialize(aStream, this);
         }
 
-        public string Serialize()
+        public static GVRProtocolMessageContainer Deserialize(Stream aStream)
         {
-            return this.ToJson();
+            var _formatter = new XmlSerializer(typeof(GVRProtocolMessageContainer));
+            var obj = _formatter.Deserialize(aStream);
+            return (GVRProtocolMessageContainer) obj;
         }
 
-        public static T Deserialize<T>(string aMsg)
-        {
-            return aMsg.FromJson<T>();
-        }
-
-        public static GVRProtocolMessage Deserialize(string aMsg)
-        {
-            var gvrmsg = aMsg.FromJson<GVRProtocolMessage>();
-            switch (gvrmsg.Type)
-            {
-                case "Ping":
-                    return aMsg.FromJson<Ping>();
-                case "Log":
-                    return aMsg.FromJson<Log>();
-                case "XInputHaptics":
-                    return aMsg.FromJson<XInputHaptics>();
-                case "UnityXRViveHaptics":
-                    return aMsg.FromJson<UnityXRViveHaptics>();
-                case "UnityXROculusInputHaptics":
-                    return aMsg.FromJson<UnityXROculusInputHaptics>();
-                case "UnityXROculusClipHaptics":
-                default:
-                    throw new Exception($"Cannot parse message of type { gvrmsg.Type }");
-            }
-
-        }
+        // Basically copying how protobuf deals with aggregate messages. Only one of these should be valid at any time.
+        public Log Log;
+        public Ping Ping;
+        public XInputHaptics XInputHaptics;
+        public UnityXRViveHaptics UnityXRViveHaptics;
+        public UnityXROculusClipHaptics UnityXROculusClipHaptics;
+        public UnityXROculusInputHaptics UnityXROculusInputHaptics;
     }
 
-    public class Ping : GVRProtocolMessage
+    [Serializable]
+    public class Ping
     {
     }
 
-    public class Log : GVRProtocolMessage
+    [Serializable]
+    public class Log
     {
         public string Message;
+
+        public Log()
+        {
+
+        }
 
         public Log(string aMsg)
         {
@@ -65,16 +59,23 @@ namespace IntifaceGameVibrationRouter
         RIGHT
     }
 
-    public class XInputHaptics : GVRProtocolMessage
+    [Serializable]
+    public class XInputHaptics
     {
         public uint LeftMotor;
         public uint RightMotor;
     }
 
-    public class UnityXRViveHaptics : GVRProtocolMessage
+    [Serializable]
+    public class UnityXRViveHaptics
     {
         public HandSpec Hand;
         public uint Duration;
+
+        public UnityXRViveHaptics()
+        {
+
+        }
 
         public UnityXRViveHaptics(HandSpec aHand, uint aDuration)
         {
@@ -83,11 +84,17 @@ namespace IntifaceGameVibrationRouter
         }
     }
 
-    public class UnityXROculusInputHaptics : GVRProtocolMessage
+    [Serializable]
+    public class UnityXROculusInputHaptics
     {
         public HandSpec Hand;
         public float Frequency;
         public float Amplitude;
+
+        public UnityXROculusInputHaptics()
+        {
+
+        }
 
         public UnityXROculusInputHaptics(HandSpec aHand, float aFrequency, float aAmplitude)
         {
@@ -97,7 +104,8 @@ namespace IntifaceGameVibrationRouter
         }
     }
 
-    public class UnityXROculusClipHaptics : GVRProtocolMessage
+    [Serializable]
+    public class UnityXROculusClipHaptics
     {
 
     }

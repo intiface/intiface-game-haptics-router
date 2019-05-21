@@ -48,10 +48,16 @@
     <Compile Include="..\GVRUnityVRModNet45\GVRUnityVRMod.cs">
       <Link>GVRUnityVRMod.cs</Link>
     </Compile>
+    <Compile Include="..\IntifaceGameVibrationRouter\GVRProtocol.cs">
+      <Link>GVRProtocol.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ILMergeConfig.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

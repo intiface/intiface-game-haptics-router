@@ -11,6 +11,7 @@ using Buttplug.Client.Connectors;
 using Buttplug.Core.Logging;
 using Buttplug.Core.Messages;
 using GVRXInputModInterface;
+using NLog;
 
 namespace IntifaceGameVibrationRouter
 {
@@ -43,6 +44,7 @@ namespace IntifaceGameVibrationRouter
         private List<ButtplugClientDevice> _devices;
         private Task _connectTask;
         private bool _quitting;
+        private Logger _log;
 
         public EventHandler ConnectedHandler;
         public EventHandler DisconnectedHandler;
@@ -57,6 +59,7 @@ namespace IntifaceGameVibrationRouter
         public IntifaceControl()
         {
             InitializeComponent();
+            _log = LogManager.GetCurrentClassLogger();
             DeviceListBox.ItemsSource = DevicesList;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12;
             _connectTask = new Task(async () => await ConnectTask());

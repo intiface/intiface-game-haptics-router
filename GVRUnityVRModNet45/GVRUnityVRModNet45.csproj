@@ -47,6 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\IntifaceGameVibrationRouter\GVRProtocol.cs">
+      <Link>GVRProtocol.cs</Link>
+    </Compile>
     <Compile Include="GVRUnityVRMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

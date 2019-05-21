@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Reflection;
 using Harmony;
+using IntifaceGameVibrationRouter;
 
 namespace GVRUnityVRMod
 {
@@ -11,11 +12,31 @@ namespace GVRUnityVRMod
         private static bool _useOutputFile = true;
         private static StreamWriter _outFile;
         private static NamedPipeClientStream _stream;
-        static void WriteToOutput(string aMsg)
+        
+        static void WriteLogToOutput(string aMsg)
         {
-            if (_useOutputFile)
+            if (_outFile != null)
             {
                 _outFile.WriteLine(aMsg);
+            }
+
+            if (_stream != null)
+            {
+                try
+                {
+                    var log = new GVRProtocolMessageContainer
+                    {
+                        Log = new Log(aMsg)
+                    };
+
+                    log.SendSerialized(_stream);
+                }
+                catch (Exception ex)
+                {
+                    _outFile.WriteLine(ex);
+                    _stream.Close();
+                    _stream = null;
+                }
             }
         }
 
@@ -25,9 +46,9 @@ namespace GVRUnityVRMod
             {
                 _outFile = new StreamWriter("C:\\Users\\qdot\\bstest.txt");
                 _outFile.AutoFlush = true;
-                WriteToOutput("Created log file.");
+                WriteLogToOutput("Created log file.");
             }
-            /*
+            
             try
             {
                 _stream = new NamedPipeClientStream("GVRPipe");
@@ -35,9 +56,9 @@ namespace GVRUnityVRMod
             }
             catch (Exception ex)
             {
-                WriteToOutput(ex.ToString());
+                WriteLogToOutput(ex.ToString());
             }
-            */
+            
 
             HarmonyInstance harmony;
             try
@@ -46,30 +67,30 @@ namespace GVRUnityVRMod
             }
             catch (Exception ex)
             {
-                WriteToOutput(ex.ToString());
+                WriteLogToOutput(ex.ToString());
                 return;
             }
 
-            WriteToOutput("Patching assemblies");
+            WriteLogToOutput("Patching assemblies");
             try
             {
                 var original = AccessTools.TypeByName("CVRSystem");
                 if (original == null)
                 {
-                    WriteToOutput("Can't find CVRSystem!");
+                    WriteLogToOutput("Can't find CVRSystem!");
                     return;
                 }
                 var method = original.GetMethod("TriggerHapticPulse");
                 if (method == null)
                 {
-                    WriteToOutput("Can't find TriggerHapticPulse!");
+                    WriteLogToOutput("Can't find TriggerHapticPulse!");
                     return;
                 }
 
                 var postfix = typeof(TriggerHapticPulse_Exfiltration_Patch).GetMethod("ValvePostfix", BindingFlags.Public | BindingFlags.Static);
                 if (postfix == null)
                 {
-                    WriteToOutput("Can't find ValvePostfix!");
+                    WriteLogToOutput("Can't find ValvePostfix!");
                     return;
                 }
 
@@ -101,11 +122,11 @@ namespace GVRUnityVRMod
             }
             catch (Exception ex)
             {
-                WriteToOutput(ex.ToString());
+                WriteLogToOutput(ex.ToString());
                 return;
             }
 
-            WriteToOutput("Patched assemblies");
+            WriteLogToOutput("Patched assemblies");
         }
 
         [HarmonyPatch()]
@@ -114,7 +135,7 @@ namespace GVRUnityVRMod
             [HarmonyPostfix]
             static public void ValvePostfix(uint unControllerDeviceIndex, uint unAxisId, char usDurationMicroSec)
             {
-                WriteToOutput($"VALVE: Writing ${usDurationMicroSec} duration to ${unControllerDeviceIndex}");
+                WriteLogToOutput($"VALVE: Writing ${usDurationMicroSec} duration to ${unControllerDeviceIndex}");
                 /*
                 var hand = node == XRNode.LeftHand ? "l" : "r";
                 var msg = $"{hand},{strength.ToString()}\n";
@@ -137,7 +158,7 @@ namespace GVRUnityVRMod
             [HarmonyPostfix]
             static void OculusPostfix(uint controllerMask, HapticsBuffer hapticsBuffer)
             {
-                WriteToOutput($"OCULUS: Writing ${hapticsBuffer.SamplesCount} samples to ${controllerMask}");
+                WriteLogToOutput($"OCULUS: Writing ${hapticsBuffer.SamplesCount} samples to ${controllerMask}");
             }
         }
 

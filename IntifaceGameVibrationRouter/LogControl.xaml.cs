@@ -4,8 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using Microsoft.Win32;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 
 namespace IntifaceGameVibrationRouter
 {
@@ -17,20 +21,69 @@ namespace IntifaceGameVibrationRouter
     {
     }
 
+    [Target("IntifaceLogger")]
+    public sealed class IntifaceNLogTarget : TargetWithLayoutHeaderAndFooter
+    {
+        private readonly LogList _logs;
+        private readonly object _logLock = new object();
+        public long MaxLogs;
+
+        public IntifaceNLogTarget(LogList aList, long aMaxLogs = 1000)
+        {
+            _logs = aList;
+            MaxLogs = aMaxLogs;
+            BindingOperations.EnableCollectionSynchronization(_logs, _logLock);
+        }
+
+        protected override void Write(LogEventInfo aLogEvent)
+        {
+            _logs.Add(Layout.Render(aLogEvent));
+            while (_logs.Count > MaxLogs)
+            {
+                _logs.RemoveAt(0);
+            }
+        }
+    }
+
     /// <summary>
     /// Interaction logic for UserControl1.xaml
     /// </summary>
     public partial class LogControl : UserControl
     {
         private readonly LogList _logs;
-        //private LoggingRule _outgoingLoggingRule;
+        private readonly IntifaceNLogTarget _logTarget;
+        private LoggingRule _outgoingLoggingRule;
+
+        public long MaxLogs
+        {
+            get
+            {
+                return _logTarget.MaxLogs;
+            }
+
+            set
+            {
+                _logTarget.MaxLogs = value;
+            }
+        }
 
         public LogControl()
         {
-            //var c = LogManager.Configuration ?? new LoggingConfiguration();
+            var c = LogManager.Configuration ?? new LoggingConfiguration();
             _logs = new LogList();
 
             InitializeComponent();
+
+            // Null check Dispatcher, otherwise test bringup for GUI tests will fail.
+            if (Dispatcher != null)
+            {
+                _logTarget = new IntifaceNLogTarget(_logs);
+                c.AddTarget("IntifaceLogger", _logTarget);
+                _outgoingLoggingRule = new LoggingRule("*", LogLevel.Debug, _logTarget);
+                c.LoggingRules.Add(_outgoingLoggingRule);
+                LogManager.Configuration = c;
+            }
+
             //LogLevelComboBox.SelectionChanged += LogLevelSelectionChangedHandler;
             LogListBox.ItemsSource = _logs;
         }
