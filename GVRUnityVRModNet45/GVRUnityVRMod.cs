@@ -9,34 +9,37 @@ namespace GVRUnityVRMod
 {
     public class GVRUnityVRModFuncs
     {
-        private static bool _useOutputFile = true;
+        private static bool _useOutputFile = false;
         private static StreamWriter _outFile;
         private static NamedPipeClientStream _stream;
-        
+
+        static void WriteToStream(GVRProtocolMessageContainer aMsg)
+        {
+            aMsg.SendSerialized(_stream);
+        }
+
         static void WriteLogToOutput(string aMsg)
         {
-            if (_outFile != null)
+            _outFile?.WriteLine(aMsg);
+
+            if (_stream == null)
             {
-                _outFile.WriteLine(aMsg);
+                return;
             }
 
-            if (_stream != null)
+            try
             {
-                try
+                WriteToStream(new GVRProtocolMessageContainer
                 {
-                    var log = new GVRProtocolMessageContainer
-                    {
-                        Log = new Log(aMsg)
-                    };
+                    Log = new Log(aMsg)
+                });
+            }
+            catch (Exception ex)
+            {
 
-                    log.SendSerialized(_stream);
-                }
-                catch (Exception ex)
-                {
-                    _outFile.WriteLine(ex);
-                    _stream.Close();
-                    _stream = null;
-                }
+                _outFile?.WriteLine(ex);
+                _stream.Close();
+                _stream = null;
             }
         }
 
@@ -48,7 +51,7 @@ namespace GVRUnityVRMod
                 _outFile.AutoFlush = true;
                 WriteLogToOutput("Created log file.");
             }
-            
+
             try
             {
                 _stream = new NamedPipeClientStream("GVRPipe");
@@ -58,7 +61,7 @@ namespace GVRUnityVRMod
             {
                 WriteLogToOutput(ex.ToString());
             }
-            
+
 
             HarmonyInstance harmony;
             try
@@ -80,14 +83,14 @@ namespace GVRUnityVRMod
                     WriteLogToOutput("Can't find CVRSystem!");
                     return;
                 }
-                var method = original.GetMethod("TriggerHapticPulse");
+                var method = AccessTools.Method(original, "TriggerHapticPulse");
                 if (method == null)
                 {
                     WriteLogToOutput("Can't find TriggerHapticPulse!");
                     return;
                 }
 
-                var postfix = typeof(TriggerHapticPulse_Exfiltration_Patch).GetMethod("ValvePostfix", BindingFlags.Public | BindingFlags.Static);
+                var postfix = AccessTools.Method(typeof(TriggerHapticPulse_Exfiltration_Patch), "ValvePostfix");
                 if (postfix == null)
                 {
                     WriteLogToOutput("Can't find ValvePostfix!");
@@ -133,9 +136,9 @@ namespace GVRUnityVRMod
         static class TriggerHapticPulse_Exfiltration_Patch
         {
             [HarmonyPostfix]
-            static public void ValvePostfix(uint unControllerDeviceIndex, uint unAxisId, char usDurationMicroSec)
+            public static void ValvePostfix(uint unControllerDeviceIndex, uint unAxisId, char usDurationMicroSec)
             {
-                WriteLogToOutput($"VALVE: Writing ${usDurationMicroSec} duration to ${unControllerDeviceIndex}");
+                WriteLogToOutput($"VALVE: Writing {(int)usDurationMicroSec} duration to {unControllerDeviceIndex}");
                 /*
                 var hand = node == XRNode.LeftHand ? "l" : "r";
                 var msg = $"{hand},{strength.ToString()}\n";
