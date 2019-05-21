@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Threading;
@@ -13,13 +14,24 @@ using SharpMonoInjector;
 
 namespace IntifaceGameVibrationRouter
 {
-    class UnityVRMod
+    public class UnityVRMod
     {
-        public static bool CanUseMod(IntPtr handle, out IntPtr module)
+        public static bool CanUseMod(IntPtr handle, string processPath, out IntPtr module, out NetFramework frameworkVersion)
         {
+            frameworkVersion = NetFramework.UNKNOWN;
             try
             {
-                return ProcessUtils.GetMonoModule(handle, out module);
+                if (!ProcessUtils.GetMonoModule(handle, out module))
+                {
+                    return false;
+                }
+
+                if (!GetNetFrameworkVersion(processPath, out frameworkVersion))
+                {
+                    return false;
+                }
+
+                return true;
             }
             catch (InjectorException ex)
             {
@@ -28,6 +40,45 @@ namespace IntifaceGameVibrationRouter
             }
 
             module = IntPtr.Zero;
+            return false;
+        }
+
+        public enum NetFramework
+        {
+            // Ok so this is a little weird. Older Unity games are actually Mono v2, and in GetNetFrameworkVersion
+            // they'll report something like v2.0.50727. However, this is actually .Net Framework 3.5 COMPATIBLE, 
+            // but it lists itself as .Net 2.0 because it's apparently missing some stuff or something. Anyways, we
+            // can usually load our .Net 3.5 mod in these older games and not have a problem.
+            NET35 = 2,
+            NET45 = 4,
+            UNKNOWN = 0,
+        }
+
+        protected static bool GetNetFrameworkVersion(string aProcessPath, out NetFramework frameworkVersion)
+        {
+            
+            // If someone is asking us this, we can assume they've already checked they can use this mod.
+            // We'll also assume it's Unity, and that there's an Assembly-CSharp.dll file somewhere in the tree below the process file.
+            Path.GetDirectoryName(aProcessPath);
+            var assemblyFiles = Directory.GetFiles(Path.GetDirectoryName(aProcessPath), "*Assembly-CSharp.dll",
+                SearchOption.AllDirectories);
+            if (assemblyFiles.Length != 1)
+            {
+                frameworkVersion = NetFramework.UNKNOWN;
+                return false;
+            }
+            var netVersion = Assembly.LoadFrom(assemblyFiles[0]).ImageRuntimeVersion;
+            if (netVersion.Contains("v4"))
+            {
+                frameworkVersion = NetFramework.NET45;
+                return true;
+            }
+            if (netVersion.Contains("v2"))
+            {
+                frameworkVersion = NetFramework.NET35;
+                return true;
+            }
+            frameworkVersion = NetFramework.UNKNOWN;
             return false;
         }
 
@@ -41,7 +92,7 @@ namespace IntifaceGameVibrationRouter
 
         }
 
-        public void Inject(int aProcessId, IntPtr aMonoModule)
+        public void Inject(int aProcessId, NetFramework aFrameworkVersion, IntPtr aMonoModule)
         {
             _readerTask = new Task(async () => await StdInReader());
             _readerTask.Start();
@@ -58,7 +109,18 @@ namespace IntifaceGameVibrationRouter
 
             try
             {
-                file = File.ReadAllBytes("./GVRUnityVRModNet45.dll");
+                if (aFrameworkVersion == NetFramework.NET45)
+                {
+                    file = File.ReadAllBytes("./GVRUnityVRModNet45.dll");
+                }
+                else if (aFrameworkVersion == NetFramework.NET35)
+                {
+                    file = File.ReadAllBytes("./GVRUnityVRModNet35.dll");
+                }
+                else
+                {
+                    throw new ArgumentException($"Passed unusable framework version {aFrameworkVersion} to Inject");
+                }
             }
             catch (IOException)
             {
@@ -111,7 +173,7 @@ namespace IntifaceGameVibrationRouter
                 {
                     try
                     {
-                        
+
                         len = await pipeServer.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
                         if (len > 0)
                         {

@@ -27,6 +27,7 @@ namespace IntifaceGameVibrationRouter
             public int Id;
             public string Owner;
             public IntPtr MonoModule = IntPtr.Zero;
+            public UnityVRMod.NetFramework FrameworkVersion = UnityVRMod.NetFramework.UNKNOWN;
 
             public bool CanUseXInput => Owner.Length > 0;
 
@@ -35,7 +36,7 @@ namespace IntifaceGameVibrationRouter
             public override string ToString()
             {
                 var f = System.IO.Path.GetFileNameWithoutExtension(FileName);
-                return $"{f} ({Id}) ({(CanUseMono ? "Mono" : "")}{(CanUseXInput && CanUseMono ? " | " : "")}{(CanUseXInput ? "XInput" : "")})";
+                return $"{f} ({Id}) ({(CanUseMono ? $"Mono/{FrameworkVersion}" : "")}{(CanUseXInput && CanUseMono ? " | " : "")}{(CanUseXInput ? "XInput" : "")})";
             }
         }
 
@@ -128,9 +129,10 @@ namespace IntifaceGameVibrationRouter
                         procInfo.Owner = owner;
                     }
 
-                    if (UnityVRMod.CanUseMod(handle, out var module))
+                    if (UnityVRMod.CanUseMod(handle, currentProc.MainModule.FileName, out var module, out var frameworkVersion))
                     {
                         procInfo.MonoModule = module;
+                        procInfo.FrameworkVersion = frameworkVersion;
                     }
 
                     if (procInfo.CanUseXInput || procInfo.CanUseMono)
@@ -180,7 +182,7 @@ namespace IntifaceGameVibrationRouter
             {
                 var process = ProcessListBox.SelectedItems.Cast<ProcessInfo>().ToList();
                 _unityMod = new UnityVRMod();
-                _unityMod.Inject(process[0].Id, process[0].MonoModule);
+                _unityMod.Inject(process[0].Id, process[0].FrameworkVersion, process[0].MonoModule);
             }
             else
             {
