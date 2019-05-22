@@ -189,9 +189,12 @@ namespace IntifaceGameHapticsRouter
             if (!_attached)
             {
                 var process = ProcessListBox.SelectedItems.Cast<ProcessInfo>().ToList();
-                _unityMod = new UnityVRMod();
-                _unityMod.Inject(process[0].Id, process[0].FrameworkVersion, process[0].MonoModule);
-                _unityMod.MessageReceivedHandler += OnMessageReceived;
+                if (process[0].CanUseMono)
+                {
+                    _unityMod = new UnityVRMod();
+                    _unityMod.Inject(process[0].Id, process[0].FrameworkVersion, process[0].MonoModule);
+                    _unityMod.MessageReceivedHandler += OnMessageReceived;
+                }
             }
             else
             {
