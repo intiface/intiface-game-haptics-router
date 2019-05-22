@@ -184,7 +184,17 @@ namespace IntifaceGameHapticsRouter
 
         public void OnLogMessage(object aObj, LogEventArgs aArgs)
         {
-            Dispatcher.Invoke(() => { LogMessageHandler?.Invoke(this, aArgs.Message.LogMessage); });
+            try
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    LogMessageHandler?.Invoke(this, aArgs.Message.LogMessage);
+                });
+            }
+            catch (TaskCanceledException)
+            {
+                // noop, we're shutting down.
+            }
         }
 
         public async Task Vibrate(double aSpeed)
