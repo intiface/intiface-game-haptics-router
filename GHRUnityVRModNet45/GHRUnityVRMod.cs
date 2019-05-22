@@ -60,10 +60,6 @@ namespace GHRUnityVRMod
                         {
                             return x.GetTypes();
                         }
-                        catch (FileNotFoundException)
-                        {
-                            return new Type[] { };
-                        }
                         catch (ReflectionTypeLoadException)
                         {
                             return new Type[] { };
@@ -76,10 +72,6 @@ namespace GHRUnityVRMod
                         try
                         {
                             return x.GetTypes();
-                        }
-                        catch (FileNotFoundException)
-                        {
-                            return new Type[] { };
                         }
                         catch (ReflectionTypeLoadException)
                         {
