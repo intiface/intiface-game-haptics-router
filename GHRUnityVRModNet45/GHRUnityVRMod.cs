@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Pipes;
+using System.Reflection;
 using Harmony;
 using IntifaceGameHapticsRouter;
 
@@ -82,6 +83,7 @@ namespace GHRUnityVRMod
                     WriteLogToOutput("Can't find CVRSystem!");
                     return;
                 }
+
                 var method = AccessTools.Method(original, "TriggerHapticPulse");
                 if (method == null)
                 {
@@ -121,6 +123,14 @@ namespace GHRUnityVRMod
                 harmony.Patch(method2, null, new HarmonyMethod(postfix2));
                 */
                 //harmony.PatchAll(Assembly.GetExecutingAssembly());
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                WriteLogToOutput(ex.ToString());
+                foreach (var lex in ex.LoaderExceptions)
+                {
+                    WriteLogToOutput(lex.ToString());
+                }
             }
             catch (Exception ex)
             {
