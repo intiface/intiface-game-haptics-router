@@ -39,6 +39,7 @@ namespace IntifaceGameHapticsRouter
             _modTab.MessageReceivedHandler += OnGVRMessageReceived;
             //_graphTab.PassthruChanged += PassthruChanged;
             _log.Info("Application started.");
+            _buildDate.Content = Properties.Resources.BuildDate;
         }
 
         protected void OnLogMessage(object aObj, string aMsg)

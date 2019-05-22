@@ -59,5 +59,15 @@ namespace IntifaceGameHapticsRouter.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wed 05/22/2019 12:41:32.51 
+        ///.
+        /// </summary>
+        internal static string BuildDate {
+            get {
+                return ResourceManager.GetString("BuildDate", resourceCulture);
+            }
+        }
     }
 }

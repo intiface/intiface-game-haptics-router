@@ -69,6 +69,15 @@
                 </Grid>
             </TabItem>
             <TabItem Header="About" Padding="10, 3, 10, 3">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Grid.Column="0" Name="_buildDate">Test</Label>
+                </Grid>
             </TabItem>
         </TabControl>
 
