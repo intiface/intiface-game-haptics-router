@@ -119,15 +119,17 @@ namespace IntifaceGameHapticsRouter
                 {
                     Debug.WriteLine("Retrying");
                     // Just keep trying to connect.
-                }
-                catch (Exception)
-                {
-                    Debug.WriteLine("Did something else fail?");
-                }
-                finally
-                {
                     // If the exception was thrown after connect, make sure we disconnect.
-                    if (_client.Connected)
+                    if (_client != null && _client.Connected)
+                    {
+                        await _client.DisconnectAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Did something else fail? {ex})");
+                    // If the exception was thrown after connect, make sure we disconnect.
+                    if (_client != null && _client.Connected)
                     {
                         await _client.DisconnectAsync();
                     }
