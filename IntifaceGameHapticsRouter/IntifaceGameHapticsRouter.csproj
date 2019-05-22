@@ -232,6 +232,16 @@
       <Project>{b72b6502-e1b3-421a-b723-b294bf5f9e6b}</Project>
       <Name>SharpMonoInjector</Name>
     </ProjectReference>
+    <ProjectReference Include="..\GHRUnityVRModNet35\GHRUnityVRModNet35.csproj">
+      <Project>{deb31023-7d8f-49f0-8b06-b35bda37672d}</Project>
+      <Name>GHRUnityVRModNet35</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\GHRUnityVRModNet45\GHRUnityVRModNet45.csproj">
+      <Project>{09ed6f36-fd6b-4b16-a5c8-95f2e1339424}</Project>
+      <Name>GHRUnityVRModNet45</Name>
+      <Private>False</Private>
+    </ProjectReference>
     <ProjectReference Include="..\GHRXInputModInterface\GHRXInputModInterface.csproj">
       <Project>{96ebcd5e-a218-4ddc-a8be-83e9369f5465}</Project>
       <Name>GHRXInputModInterface</Name>
