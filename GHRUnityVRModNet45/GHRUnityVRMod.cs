@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Pipes;
+using System.Linq;
 using System.Reflection;
 using Harmony;
 using IntifaceGameHapticsRouter;
@@ -43,6 +44,54 @@ namespace GHRUnityVRMod
             }
         }
 
+        // Harmony's AccessTools.TypeByName assumes we're in a system with
+        // accurately linked libraries and filled-in types. Unfortunately, if
+        // we're injecting in a already modded game, this may not be the case.
+        // We need to check for reflection errors, and just skip types that
+        // throw them while forming the LINQ queries.
+        public static Type InternalTypeByName(string name)
+        {
+            var type = Type.GetType(name, false);
+            if (type == null)
+                type = AppDomain.CurrentDomain.GetAssemblies()
+                    .SelectMany(x =>
+                    {
+                        try
+                        {
+                            return x.GetTypes();
+                        }
+                        catch (FileNotFoundException)
+                        {
+                            return new Type[] { };
+                        }
+                        catch (ReflectionTypeLoadException)
+                        {
+                            return new Type[] { };
+                        }
+                    })
+                    .FirstOrDefault(x => x.FullName == name);
+            if (type == null)
+                type = AppDomain.CurrentDomain.GetAssemblies()
+                    .SelectMany(x => {
+                        try
+                        {
+                            return x.GetTypes();
+                        }
+                        catch (FileNotFoundException)
+                        {
+                            return new Type[] { };
+                        }
+                        catch (ReflectionTypeLoadException)
+                        {
+                            return new Type[] { };
+                        }
+                    })
+                    .FirstOrDefault(x => x.Name == name);
+            //if (type == null && Harmony.DEBUG)
+            //    FileLog.Log("AccessTools.TypeByName: Could not find type named " + name);
+            return type;
+        }
+
         static void Load()
         {
             if (_useOutputFile)
@@ -73,11 +122,11 @@ namespace GHRUnityVRMod
                 WriteLogToOutput(ex.ToString());
                 return;
             }
-
+            
             WriteLogToOutput("Patching assemblies");
             try
             {
-                var original = AccessTools.TypeByName("CVRSystem");
+                var original = InternalTypeByName("CVRSystem");
                 if (original == null)
                 {
                     WriteLogToOutput("Can't find CVRSystem!");
@@ -141,10 +190,8 @@ namespace GHRUnityVRMod
             WriteLogToOutput("Patched assemblies");
         }
 
-        [HarmonyPatch()]
         static class TriggerHapticPulse_Exfiltration_Patch
         {
-            [HarmonyPostfix]
             public static void ValvePostfix(uint unControllerDeviceIndex, uint unAxisId, char usDurationMicroSec)
             {
                 // TODO We need to create an instance of GetTrackedDeviceIndexForControllerRole and map Right/Left from ETrackedControllerRole to figure out correct hands here.
