@@ -29,7 +29,7 @@ namespace IntifaceGameHapticsRouter
             public IntPtr MonoModule = IntPtr.Zero;
             public UnityVRMod.NetFramework FrameworkVersion = UnityVRMod.NetFramework.UNKNOWN;
 
-            public bool CanUseXInput => Owner.Length > 0;
+            public bool CanUseXInput => !string.IsNullOrEmpty(Owner);
 
             public bool CanUseMono => MonoModule != IntPtr.Zero;
 
