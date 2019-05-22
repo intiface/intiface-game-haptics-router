@@ -30,10 +30,13 @@ Name: "{localappdata}\IntifaceGameHapticsRouter"
 
 [Files]
 Source: "IntifaceGameHapticsRouter\bin\{#Configuration}\*.exe"; DestDir: "{app}"
-Source: "IntifaceCLI\bin\{#Configuration}\*.dll"; DestDir: "{app}"
-Source: "IntifaceCLI\bin\{#Configuration}\*.config"; DestDir: "{app}"
+Source: "IntifaceGameHapticsRouter\bin\{#Configuration}\*.dll"; DestDir: "{app}"
+Source: "IntifaceGameHapticsRouter\bin\{#Configuration}\*.config"; DestDir: "{app}"
 Source: "Readme.md"; DestDir: "{app}"; DestName: "Readme.txt"
 Source: "LICENSE"; DestDir: "{app}"; DestName: "License.txt"
+
+[Icons]
+Name: "{commonprograms}\Intiface Game Haptics Router"; Filename: "{app}\IntifaceGameHapticsRouter.exe"
 
 // [Run]
 // Filename: "{app}\Readme.txt"; Description: "View the README file"; Flags: postinstall shellexec unchecked
@@ -97,9 +100,5 @@ begin
     begin
       UnInstallOldVersion();
     end;
-  end;
-  if (CurStep=ssPostInstall) then
-  begin
-    WriteEnginePath();
   end;
 end;
