@@ -56,12 +56,23 @@ namespace IntifaceGameHapticsRouter
             Path.GetDirectoryName(aProcessPath);
             var assemblyFiles = Directory.GetFiles(Path.GetDirectoryName(aProcessPath), "*Assembly-CSharp.dll",
                 SearchOption.AllDirectories);
-            if (assemblyFiles.Length != 1)
+            if (assemblyFiles.Length == 0)
             {
                 frameworkVersion = NetFramework.UNKNOWN;
                 return false;
             }
-            var netVersion = Assembly.LoadFrom(assemblyFiles[0]).ImageRuntimeVersion;
+
+            // There are instances where we may have multiple Assembly-CSharp files in a tree. This is usually because some other
+            // plugin architecture is already there, and has made backups of the originals. We can assume they'll all be the same
+            // CLR version, and that's really all we care about, so just load the first one we find.
+            //
+            // Also, use a ReflectionOnly load on this. We don't want to try to bring the functions into our own process space,
+            // we just want to query the CLR version.
+            //
+            // Finally, ImageRuntimeVersion is NOT a .Net Framework version. It's a CLR version, so it'll either be v2 or v4. We
+            // can basically assume that if we see v2 here, we're actually talking .Net Framework 3.5. See comment in NetFramework
+            // enum. Which I guess should actually be called NetCLR, but fuck it, whatever.
+            var netVersion = Assembly.ReflectionOnlyLoadFrom(assemblyFiles[0]).ImageRuntimeVersion;
             if (netVersion.Contains("v4"))
             {
                 frameworkVersion = NetFramework.NET45;
