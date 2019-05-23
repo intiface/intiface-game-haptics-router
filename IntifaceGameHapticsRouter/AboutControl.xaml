@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="IntifaceGameHapticsRouter.AboutControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:IntifaceGameHapticsRouter"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Background="White">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" Height="auto" Width="auto">
+            <Span FontSize="19" FontWeight="Bold">Intiface Game Haptics Router v0</Span><LineBreak />
+            By <Hyperlink NavigateUri="https://metafetish.com" RequestNavigate="Hyperlink_RequestNavigate">Nonpolynomial Labs, LLC</Hyperlink><LineBreak />
+            <LineBreak/>
+            Software updates at <Hyperlink NavigateUri="https://ghr.intiface.io" RequestNavigate="Hyperlink_RequestNavigate">https://ghr.intiface.io/</Hyperlink><LineBreak/>
+            Source code at <Hyperlink NavigateUri="https://github.com/intiface/intiface-game-haptics-router" RequestNavigate="Hyperlink_RequestNavigate">https://github.com/intiface/intiface-game-haptics-router</Hyperlink><LineBreak/>
+            Forums and Support at <Hyperlink NavigateUri="https://metafetish.club" RequestNavigate="Hyperlink_RequestNavigate">https://metafetish.club</Hyperlink><LineBreak/>
+            Discord Server at <Hyperlink NavigateUri="https://discord.buttplug.io" RequestNavigate="Hyperlink_RequestNavigate">https://discord.buttplug.io</Hyperlink><LineBreak/>
+            License information <Hyperlink NavigateUri="https://github.com/intiface/intiface-game-haptics-router/blob/master/LICENSE" RequestNavigate="Hyperlink_RequestNavigate">here</Hyperlink><LineBreak/>
+            <LineBreak/>
+            <LineBreak/>
+            <Hyperlink NavigateUri="https://patreon.com/qdot" RequestNavigate="Hyperlink_RequestNavigate">Support this project on Patreon!</Hyperlink>
+            <LineBreak/>
+            <LineBreak/>
+        </TextBlock>
+        <Label Grid.Row="1">Build Time: (If this looks old, check update link above for possible new versions)</Label>
+        <Label Grid.Row="2" Name="_buildDate">Test</Label>
+    </Grid>
+</UserControl>
