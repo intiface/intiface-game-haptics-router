@@ -111,7 +111,7 @@ namespace IntifaceGameHapticsRouter
                     }
 
                     // This is usually what throws, so do it before we invoke via dispatcher.
-                    var owner = RemoteHooking.GetProcessIdentity(currentProc.Id).Name;
+                    // var owner = RemoteHooking.GetProcessIdentity(currentProc.Id).Name;
 
                     if ((handle = Native.OpenProcess(flags, false, currentProc.Id)) == IntPtr.Zero)
                     {
