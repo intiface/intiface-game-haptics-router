@@ -118,52 +118,58 @@ namespace GHRUnityVRMod
             WriteLogToOutput("Patching assemblies");
             try
             {
-                var original = InternalTypeByName("CVRSystem");
-                if (original == null)
+                try
                 {
-                    WriteLogToOutput("Can't find CVRSystem!");
-                    return;
+                    var original = InternalTypeByName("CVRSystem");
+                    if (original == null)
+                    {
+                        throw new Exception("Can't find CVRSystem!");
+                    }
+
+                    var method = AccessTools.Method(original, "TriggerHapticPulse");
+                    if (method == null)
+                    {
+                        throw new Exception("Can't find TriggerHapticPulse!");
+                    }
+
+                    var postfix = AccessTools.Method(typeof(TriggerHapticPulse_Exfiltration_Patch), "ValvePostfix");
+                    if (postfix == null)
+                    {
+                        throw new Exception("Can't find ValvePostfix!");
+                    }
+
+                    harmony.Patch(method, null, new HarmonyMethod(postfix));
+                }
+                catch (Exception ex)
+                {
+                    WriteLogToOutput($"Not attaching to CVRSystem: {ex}");
                 }
 
-                var method = AccessTools.Method(original, "TriggerHapticPulse");
-                if (method == null)
+                try
                 {
-                    WriteLogToOutput("Can't find TriggerHapticPulse!");
-                    return;
-                }
+                    var original2 = InternalTypeByName("OVRPlugin");
+                    if (original2 == null)
+                    {
+                        throw new Exception("Can't find OVRPlugin!");
+                    }
+                    var method2 = original2.GetMethod("SetControllerHaptics");
+                    if (method2 == null)
+                    {
+                        throw new Exception("Can't find SetControllerHaptics!");
+                    }
 
-                var postfix = AccessTools.Method(typeof(TriggerHapticPulse_Exfiltration_Patch), "ValvePostfix");
-                if (postfix == null)
-                {
-                    WriteLogToOutput("Can't find ValvePostfix!");
-                    return;
-                }
+                    var postfix2 = AccessTools.Method(typeof(TriggerHapticPulse_Oculus_Exfiltration_Patch), "OculusPostfix");
+                    if (postfix2 == null)
+                    {
+                        throw new Exception("Can't find OculusPostfix!");
+                    }
 
-                harmony.Patch(method, null, new HarmonyMethod(postfix));
-                /*
-                var original2 = AccessTools.TypeByName("OVRPlugin");
-                if (original2 == null)
-                {
-                    WriteToOutput("Can't find OVRPlugin!");
-                    return;
+                    harmony.Patch(method2, null, new HarmonyMethod(postfix2));
                 }
-                var method2 = original.GetMethod("SetControllerHaptics");
-                if (method2 == null)
+                catch (Exception ex)
                 {
-                    WriteToOutput("Can't find SetControllerHaptics!");
-                    return;
+                    WriteLogToOutput($"Not attaching to OVRPlugin: {ex}");
                 }
-
-                var postfix2 = typeof(TriggerHapticPulse_Oculus_Exfiltration_Patch).GetMethod("OculusPostfix", BindingFlags.Public | BindingFlags.Static);
-                if (postfix2 == null)
-                {
-                    WriteToOutput("Can't find OculusPostfix!");
-                    return;
-                }
-
-                harmony.Patch(method2, null, new HarmonyMethod(postfix2));
-                */
-                //harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             catch (ReflectionTypeLoadException ex)
             {
