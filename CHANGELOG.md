@@ -1,3 +1,14 @@
+# v1 (2019-05-23)
+
+## Features
+
+- Add support for Oculus "Clip" haptics, needed for Oculus Store Games
+
+## Bugfixes
+
+- IPC messages from Unity mod should now show up in logs.
+- Clean up mod patching functions a bit
+
 # v0 (2019-05-22)
 
 ## Features
