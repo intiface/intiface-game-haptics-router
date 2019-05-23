@@ -123,12 +123,12 @@ namespace IntifaceGameHapticsRouter
                         FileName = currentProc.ProcessName,
                         Id = currentProc.Id,
                     };
-
+                    /*
                     if (XInputMod.CanUseMod(handle))
                     {
                         procInfo.Owner = owner;
                     }
-
+                    */
                     if (UnityVRMod.CanUseMod(handle, currentProc.MainModule.FileName, out var module, out var frameworkVersion))
                     {
                         procInfo.MonoModule = module;
