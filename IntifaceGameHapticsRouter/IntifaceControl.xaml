@@ -21,15 +21,16 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" Grid.Column="0">IPC Name:</Label>
-        <TextBox Grid.Row="0" Grid.Column="1" Margin="0.333,0,-160,0.333">ButtplugPort</TextBox>
-        <Label Grid.Row="1" Grid.Column="0">IP Address:</Label>
-        <TextBox Grid.Row="1" Grid.Column="1">127.0.0.1</TextBox>
-        <Label Grid.Row="2" Grid.Column="0">Secure Port:</Label>
-        <TextBox Grid.Row="2" Grid.Column="1">12346</TextBox>
-        <Label Grid.Row="3" Grid.Column="0">Insecure Port:</Label>
-        <TextBox Grid.Row="3" Grid.Column="1">12345</TextBox>
         <Label Grid.Row="4" Grid.Column="1" Name="ConnectionStatus">Connecting</Label>
+        <!--
+        <Label Grid.Row="0" Grid.Column="0" Visibility="Hidden">IPC Name:</Label>
+        <TextBox Grid.Row="0" Grid.Column="1" Visibility="Hidden" Margin="0.333,0,-160,0.333">ButtplugPort</TextBox>
+        <Label Grid.Row="1" Grid.Column="0" Visibility="Hidden">IP Address:</Label>
+        <TextBox Grid.Row="1" Grid.Column="1" Visibility="Hidden">127.0.0.1</TextBox>
+        <Label Grid.Row="2" Grid.Column="0" Visibility="Hidden">Secure Port:</Label>
+        <TextBox Grid.Row="2" Grid.Column="1" Visibility="Hidden">12346</TextBox>
+        <Label Grid.Row="3" Grid.Column="0" Visibility="Hidden">Insecure Port:</Label>
+        <TextBox Grid.Row="3" Grid.Column="1" Visibility="Hidden">12345</TextBox>-->
         <Separator Grid.Row="5" Grid.ColumnSpan="3"></Separator>
         <ListBox Grid.Row="6" Grid.ColumnSpan="3" Name="DeviceListBox">
             <ListBox.ItemTemplate>
