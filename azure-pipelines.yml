@@ -1,0 +1,96 @@
+trigger:
+  branches:
+    include:
+      - master
+      - dev
+
+pr:
+  branches:
+    include:
+      - master
+      - dev
+
+variables:
+  solution: 'IntifaceGameHapticsRouter.sln'
+  buildPlatform: 'Any CPU'
+
+jobs:
+  - job: Windows
+    pool:
+      vmImage: 'windows-2019'
+    strategy:
+      matrix:
+        # Debug:
+        #   buildConfiguration: Debug
+        Release:
+          buildConfiguration: Release
+    steps:
+      - template: build/build-start.yml
+      # Set up key after build start, otherwise we won't have nuget to update yet.
+      - template: build/setup-signing-key.yml
+      - task: VSBuild@1
+        displayName: "Build Project"
+        inputs:
+          solution: '$(solution)'
+          platform: '$(buildPlatform)'
+          configuration: '$(buildConfiguration)'
+          maximumCpuCount: true
+      - task: PowerShell@2
+        displayName: 'Sign Executable in tree'
+        inputs:
+          targetType: inline
+          script: |
+            Set-Alias Signtool 'C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe'
+            Signtool sign /f SigningCert.pfx /p "$(NPLabsRepoSigningKey)" /tr http://timestamp.comodoca.com/rfc3161 $(System.DefaultWorkingDirectory)\IntifaceGameHapticsRouter\bin\$(buildConfiguration)\IntifaceGameHapticsRouter.exe
+      - task: PowerShell@2
+        displayName: "Build Installer"
+        inputs:
+          targetType: inline
+          script: |
+            $Env:CONFIGURATION = "$(buildConfiguration)"
+            $Env:BUILD_VERSION = "$(gitVersion)"
+            cinst -y --no-progress innosetup
+            ISCC intiface-ghr-installer.iss
+            move installer\intiface-ghr-installer.exe installer\$(cliBuildName)-installer.exe
+      - task: PowerShell@2
+        displayName: 'Sign Installer'
+        inputs:
+          targetType: inline
+          script: |
+            Set-Alias Signtool 'C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe'
+            Signtool sign /f SigningCert.pfx /p "$(NPLabsRepoSigningKey)" /tr http://timestamp.comodoca.com/rfc3161 $(System.DefaultWorkingDirectory)\installer\$(cliBuildName)-installer.exe
+      - task: CopyFiles@2
+        displayName: "Copy installer to staging"
+        inputs:
+          contents: "$(System.DefaultWorkingDirectory)/installer/*.exe"
+          targetFolder: '$(Build.ArtifactStagingDirectory)'
+          flattenFolders: true
+      - task: PublishPipelineArtifact@0
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifactName: 'win-x64-$(buildConfiguration)'
+  - job: Deploy
+    dependsOn:
+      - Windows
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    pool:
+      vmImage: 'windows-2019'
+    steps:
+      - template: build/setup-variables.yml
+      - task: DownloadPipelineArtifact@1
+        displayName: Download Artifacts from other jobs
+        inputs:
+          buildType: 'current'
+      - task: GitHubRelease@0
+        displayName: Upload GHR Release to Github
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+        inputs:
+          gitHubConnection: "release"
+          repositoryName: "intiface/intiface-game-haptics-router"
+          action: "create"
+          tagSource: "auto"
+          title: "Intiface Game Vibration Router $(gitVersion)"
+          assets: |
+            $(System.ArtifactsDirectory)\**\*.zip
+            $(System.ArtifactsDirectory)\**\*installer.exe
+          isPreRelease: false

@@ -1,0 +1,8 @@
+steps:
+  - template: ./setup-variables.yml
+  - task: NuGetToolInstaller@0
+    displayName: "Install Platform Dependencies"
+  - task: NuGetCommand@2
+    displayName: "Restore Project"
+    inputs:
+      restoreSolution: '$(solution)'
