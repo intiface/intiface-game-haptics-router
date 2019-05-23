@@ -176,10 +176,7 @@ namespace IntifaceGameHapticsRouter
 
         private void OnMessageReceived(object aObj, GHRProtocolMessageContainer aMsg)
         {
-            Dispatcher.Invoke(() =>
-            {
-                MessageReceivedHandler?.Invoke(this, aMsg);
-            });
+          MessageReceivedHandler?.Invoke(this, aMsg);
         }
 
         private void AttachButton_Click(object aObj, System.Windows.RoutedEventArgs aEvent)
@@ -192,8 +189,8 @@ namespace IntifaceGameHapticsRouter
                 if (process[0].CanUseMono)
                 {
                     _unityMod = new UnityVRMod();
-                    _unityMod.Inject(process[0].Id, process[0].FrameworkVersion, process[0].MonoModule);
                     _unityMod.MessageReceivedHandler += OnMessageReceived;
+                    _unityMod.Inject(process[0].Id, process[0].FrameworkVersion, process[0].MonoModule);
                 }
             }
             else
