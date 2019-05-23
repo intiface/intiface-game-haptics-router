@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Windows;
 using System.Windows.Controls;
 using Buttplug.Client;
 using Buttplug.Client.Connectors;
@@ -110,8 +111,9 @@ namespace IntifaceGameHapticsRouter
                     await Dispatcher.Invoke(async () =>
                     {
                         ConnectedHandler?.Invoke(this, new EventArgs());
-                        ConnectionStatus.Content = "Connected";
+                        ConnectionStatus.Content = "Connected to Intiface (Embedded)";
                         await StartScanning();
+                        _scanningButton.Visibility = Visibility.Visible;
                     });
                     break;
                 }
@@ -146,11 +148,28 @@ namespace IntifaceGameHapticsRouter
         public async Task StartScanning()
         {
             await _client.StartScanningAsync();
+            _scanningButton.Content = "Stop Scanning";
         }
 
         public async Task StopScanning()
         {
             await _client.StopScanningAsync();
+            _scanningButton.Content = "Start Scanning";
+        }
+
+        public async void OnScanningClick(object aObj, EventArgs aArgs)
+        {
+            _scanningButton.IsEnabled = false;
+            // Dear god this is so jank. How is IsScanning not exposed on the Buttplug Client?
+            if (_scanningButton.Content.ToString().Contains("Stop"))
+            {
+                await StopScanning();
+            }
+            else
+            {
+                await StartScanning();
+            }
+            _scanningButton.IsEnabled = true;
         }
 
         public void OnDisconnect(object aObj, EventArgs aArgs)

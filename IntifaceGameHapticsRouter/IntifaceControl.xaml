@@ -21,7 +21,6 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
-        <Label Grid.Row="4" Grid.Column="1" Name="ConnectionStatus">Connecting</Label>
         <!--
         <Label Grid.Row="0" Grid.Column="0" Visibility="Hidden">IPC Name:</Label>
         <TextBox Grid.Row="0" Grid.Column="1" Visibility="Hidden" Margin="0.333,0,-160,0.333">ButtplugPort</TextBox>
@@ -31,6 +30,8 @@
         <TextBox Grid.Row="2" Grid.Column="1" Visibility="Hidden">12346</TextBox>
         <Label Grid.Row="3" Grid.Column="0" Visibility="Hidden">Insecure Port:</Label>
         <TextBox Grid.Row="3" Grid.Column="1" Visibility="Hidden">12345</TextBox>-->
+        <Label Grid.Row="3" Grid.Column="1" Name="ConnectionStatus">Connecting to Intiface (Embedded)</Label>
+        <Button Grid.Row="4" Grid.Column="1" Name="_scanningButton" Visibility="Collapsed" Click="OnScanningClick">Scan For Devices</Button>
         <Separator Grid.Row="5" Grid.ColumnSpan="3"></Separator>
         <ListBox Grid.Row="6" Grid.ColumnSpan="3" Name="DeviceListBox">
             <ListBox.ItemTemplate>
