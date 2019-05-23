@@ -53,7 +53,7 @@ jobs:
             $Env:BUILD_VERSION = "$(gitVersion)"
             cinst -y --no-progress innosetup
             ISCC intiface-ghr-installer.iss
-            move installer\intiface-ghr-installer.exe installer\$(cliBuildName)-installer.exe
+            move installer\intiface-game-haptics-router-installer.exe installer\$(cliBuildName)-installer.exe
       - task: PowerShell@2
         displayName: 'Sign Installer'
         inputs:
