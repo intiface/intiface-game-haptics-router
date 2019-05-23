@@ -106,6 +106,18 @@ namespace IntifaceGameHapticsRouter
     [Serializable]
     public class UnityXROculusClipHaptics
     {
+        public HandSpec Hand;
+        public byte[] ClipBuffer;
 
+        public UnityXROculusClipHaptics()
+        {
+
+        }
+
+        public UnityXROculusClipHaptics(HandSpec aHand, byte[] aClipBuffer)
+        {
+            Hand = aHand;
+            ClipBuffer = aClipBuffer;
+        }
     }
 }

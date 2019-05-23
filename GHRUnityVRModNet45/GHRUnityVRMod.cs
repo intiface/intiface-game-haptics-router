@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Harmony;
 using IntifaceGameHapticsRouter;
 
@@ -211,13 +212,18 @@ namespace GHRUnityVRMod
             public int SamplesCount;
         }
 
-        [HarmonyPatch()]
         static class TriggerHapticPulse_Oculus_Exfiltration_Patch
         {
-            [HarmonyPostfix]
             static void OculusPostfix(uint controllerMask, HapticsBuffer hapticsBuffer)
             {
-                WriteLogToOutput($"OCULUS: Writing ${hapticsBuffer.SamplesCount} samples to ${controllerMask}");
+                // TODO This won't work if SampleSize != 1. Check Sample Size somewhere.
+                byte[] clipBuffer = new byte[hapticsBuffer.SamplesCount];
+                Marshal.Copy(hapticsBuffer.Samples, clipBuffer, 0, hapticsBuffer.SamplesCount);
+                // If the buffer is nothing but 0s, we don't care about it.
+                if (clipBuffer.Max() != 0)
+                {
+                    WriteToStream(new GHRProtocolMessageContainer { UnityXROculusClipHaptics = new UnityXROculusClipHaptics(HandSpec.LEFT, clipBuffer) });
+                }
             }
         }
 
