@@ -134,7 +134,7 @@ namespace GHRUnityVRMod
         {
             if (_useOutputFile)
             {
-                _outFile = new StreamWriter(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%") + "\\bstest.txt");
+                _outFile = new StreamWriter(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%") + "\\ghrtest.txt");
                 _outFile.AutoFlush = true;
                 WriteLogToOutput("Created log file.");
             }
