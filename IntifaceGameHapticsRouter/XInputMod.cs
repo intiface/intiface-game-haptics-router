@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Text;
-using System.Threading.Tasks;
+using System.Timers;
 using EasyHook;
 using GHRXInputModInterface;
 using NLog;
@@ -16,9 +14,12 @@ namespace IntifaceGameHapticsRouter
 {
     class XInputMod
     {
+        public EventHandler<GHRProtocolMessageContainer> MessageReceivedHandler;
         private IpcServerChannel _xinputHookServer;
         private string _channelName;
         private Logger _log;
+        private Vibration _lastVibration = new Vibration();
+        private Vibration _lastSentVibration = new Vibration();
 
         /// <summary>
         /// Denotes whether we can use XInput mods with this process.
@@ -68,9 +69,10 @@ namespace IntifaceGameHapticsRouter
             GHRXInputModInterface.GHRXInputModInterface.VibrationPingMessageReceived += OnVibrationPingMessage;
             GHRXInputModInterface.GHRXInputModInterface.VibrationExceptionReceived += OnVibrationException;
             GHRXInputModInterface.GHRXInputModInterface.VibrationExitReceived += OnVibrationExit;
+            GHRXInputModInterface.GHRXInputModInterface.VibrationLogMessageReceived += OnVibrationLogMessage;
         }
 
-        private void Attach(int aProcessId)
+        public void Attach(int aProcessId)
         {
             try
             {
@@ -79,7 +81,7 @@ namespace IntifaceGameHapticsRouter
                     WellKnownObjectMode.Singleton);
                 var dllFile = System.IO.Path.Combine(
                     System.IO.Path.GetDirectoryName(typeof(GHRXInputModPayload.GHRXInputModPayload).Assembly.Location),
-                    "GVRXInputModPayload.dll");
+                    "GHRXInputModPayload.dll");
 
                 _log.Info($"Beginning process injection on {aProcessId}...");
                 _log.Info($"Injecting DLL {dllFile}");
@@ -109,7 +111,13 @@ namespace IntifaceGameHapticsRouter
 
         private void OnVibrationCommand(object aObj, Vibration aVibration)
         {
+            if (aVibration == _lastVibration)
+            {
+                return;
+            }
 
+            _lastVibration = aVibration;
+            MessageReceivedHandler?.Invoke(this, new GHRProtocolMessageContainer { XInputHaptics = new XInputHaptics(aVibration.LeftMotorSpeed, aVibration.RightMotorSpeed)});
         }
 
         private void OnVibrationException(object aObj, Exception aEx)
@@ -118,12 +126,16 @@ namespace IntifaceGameHapticsRouter
             Detach();
         }
 
-        private void OnVibrationPingMessage(object aObj, string aMsg)
+        private void OnVibrationLogMessage(object aObj, string aMsg)
         {
-            _log.Info($"Remote Ping Message: {aMsg}");
+            _log.Info($"XInput Mod: {aMsg}");
         }
 
-        private void OnVibrationExit(object aObj, bool aTrue)
+        private void OnVibrationPingMessage(object aObj, EventArgs aIgnored)
+        {
+        }
+
+        private void OnVibrationExit(object aObj, EventArgs aIgnored)
         {
             Detach();
         }

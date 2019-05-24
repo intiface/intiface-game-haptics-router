@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Timers;
 
 namespace GHRXInputModInterface
 {
@@ -31,33 +30,17 @@ namespace GHRXInputModInterface
         // with this interface. Just make the EventHandler static so we can attach as needed from anywhere.
         public static event EventHandler<Vibration> VibrationCommandReceived;
         public static event EventHandler<Exception> VibrationExceptionReceived;
-        public static event EventHandler<string> VibrationPingMessageReceived;
-        public static event EventHandler<bool> VibrationExitReceived;
+        public static event EventHandler VibrationPingMessageReceived;
+        public static event EventHandler<string> VibrationLogMessageReceived;
+        public static event EventHandler VibrationExitReceived;
         private static bool _shouldStop;
-
-        private Timer _exitTimer = new Timer();
         public static bool _shouldPassthru = true;
-        private bool _hasPinged;
+
         public GHRXInputModInterface()
         {
             // Every time we create a new instance, reset the static stopping variable.
             _shouldStop = false;
             _shouldPassthru = true;
-            // Check 4 times a second
-            _exitTimer.Interval = 250;
-            _exitTimer.Enabled = true;
-            _exitTimer.Elapsed += OnTimerElapsed;
-        }
-
-        private void OnTimerElapsed(object aObj, EventArgs aEventArgs)
-        {
-            if (!_hasPinged || _shouldStop)
-            {
-                _exitTimer.Enabled = false;
-                Exit();
-                return;
-            }
-            _hasPinged = false;
         }
 
         public bool ShouldPassthru()
@@ -67,7 +50,7 @@ namespace GHRXInputModInterface
 
         public void Exit()
         {
-            VibrationExitReceived?.Invoke(this, true);
+            VibrationExitReceived?.Invoke(this, EventArgs.Empty);
         }
 
         public static void Detach()
@@ -90,11 +73,12 @@ namespace GHRXInputModInterface
 
         public bool Ping(Int32 aPid, string aMsg)
         {
-            _hasPinged = true;
             if (aMsg.Length > 0)
             {
-                VibrationPingMessageReceived?.Invoke(this, aMsg);
+                VibrationLogMessageReceived?.Invoke(this, aMsg);
+                return !_shouldStop;
             }
+            VibrationPingMessageReceived?.Invoke(this, EventArgs.Empty);
             return !_shouldStop;
         }
     }

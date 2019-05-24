@@ -71,6 +71,7 @@ namespace IntifaceGameHapticsRouter
         private readonly Logger _log;
         private Task _enumProcessTask;
         private UnityVRMod _unityMod;
+        private XInputMod _xinputMod;
 
         public ModControl()
         {
@@ -111,7 +112,7 @@ namespace IntifaceGameHapticsRouter
                     }
 
                     // This is usually what throws, so do it before we invoke via dispatcher.
-                    // var owner = RemoteHooking.GetProcessIdentity(currentProc.Id).Name;
+                    var owner = RemoteHooking.GetProcessIdentity(currentProc.Id).Name;
 
                     if ((handle = Native.OpenProcess(flags, false, currentProc.Id)) == IntPtr.Zero)
                     {
@@ -123,12 +124,12 @@ namespace IntifaceGameHapticsRouter
                         FileName = currentProc.ProcessName,
                         Id = currentProc.Id,
                     };
-                    /*
+                    
                     if (XInputMod.CanUseMod(handle))
                     {
                         procInfo.Owner = owner;
                     }
-                    */
+                    
                     if (UnityVRMod.CanUseMod(handle, currentProc.MainModule.FileName, out var module, out var frameworkVersion))
                     {
                         procInfo.MonoModule = module;
@@ -154,7 +155,7 @@ namespace IntifaceGameHapticsRouter
                 }
                 catch (Exception aEx)
                 {
-                    // _log.Error(aEx);
+                    _log.Error(aEx);
                 }
                 finally
                 {
@@ -191,6 +192,13 @@ namespace IntifaceGameHapticsRouter
                     _unityMod = new UnityVRMod();
                     _unityMod.MessageReceivedHandler += OnMessageReceived;
                     _unityMod.Inject(process[0].Id, process[0].FrameworkVersion, process[0].MonoModule);
+                }
+
+                if (process[0].CanUseXInput)
+                {
+                    _xinputMod = new XInputMod();
+                    _xinputMod.Attach(process[0].Id);
+                    _xinputMod.MessageReceivedHandler += OnMessageReceived;
                 }
             }
             else

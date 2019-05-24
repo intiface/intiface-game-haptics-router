@@ -15,16 +15,24 @@ namespace IntifaceGameHapticsRouter
     {
         private readonly NLog.Logger _log;
         private Timer vrTimer = new Timer();
-
+        private Timer xinputTimer = new Timer();
+        private XInputHaptics _lastXInput;
+        private bool _needXInputRecalc;
+        private double _multiplier;
+        private double _baseline;
         public MainWindow()
         {
             InitializeComponent();
             vrTimer.Interval = 75;
-            vrTimer.Elapsed += OnTimer;
+            vrTimer.Elapsed += OnVRTimer;
+            xinputTimer.Interval = 50;
+            xinputTimer.Elapsed += OnXInputTimer;
             if (Application.Current == null)
             {
                 return;
             }
+
+
             _log = LogManager.GetCurrentClassLogger();
             LogManager.Configuration = LogManager.Configuration ?? new LoggingConfiguration();
 #if DEBUG
@@ -37,8 +45,24 @@ namespace IntifaceGameHapticsRouter
 
             _intifaceTab.LogMessageHandler += OnLogMessage;
             _modTab.MessageReceivedHandler += OnGVRMessageReceived;
+            _graphTab.MultiplierChanged += OnMultiplierChanged;
+            _graphTab.BaselineChanged += OnBaselineChanged;
+            _multiplier = _graphTab.Multiplier;
+            _baseline = _graphTab.Baseline;
             //_graphTab.PassthruChanged += PassthruChanged;
             _log.Info("Application started.");
+        }
+
+        protected void OnMultiplierChanged(object aObj, double aValue)
+        {
+            _needXInputRecalc = true;
+            _multiplier = aValue;
+        }
+
+        protected void OnBaselineChanged(object aObj, double aValue)
+        {
+            _needXInputRecalc = true;
+            _baseline = aValue;
         }
 
         protected void OnLogMessage(object aObj, string aMsg)
@@ -46,12 +70,36 @@ namespace IntifaceGameHapticsRouter
             _log.Info(aMsg);
         }
 
-        protected async void OnTimer(object aObj, ElapsedEventArgs aArgs)
+        protected async void OnVRTimer(object aObj, ElapsedEventArgs aArgs)
         {
             vrTimer.Stop();
             await Dispatcher.Invoke(async () => { await _intifaceTab.Vibrate(0); });
         }
-        
+
+        protected async void OnXInputTimer(object aObj, ElapsedEventArgs aArgs)
+        {
+            if (!_needXInputRecalc)
+            {
+                return;
+            }
+            
+            // If we've received an off packet, just assume we won't be updating again until we get something new.
+            if (_lastXInput.LeftMotor == 0 && _lastXInput.RightMotor == 0)
+            {
+                xinputTimer.Stop();
+            }
+
+            var averageVibeSpeed = (_lastXInput.LeftMotor + _lastXInput.RightMotor) / (2.0 * 65535.0);
+
+            // Calculate the vibe speed by first adding the multiplier to the averaged speed 
+            // Then check if it's above the baseline, if not default to the baseline
+            // If it is then make sure we don't go above 1.0 speed or things start breaking
+            var vibeSpeed = Math.Min(Math.Max(averageVibeSpeed * _multiplier, _baseline), 1.0);
+            Debug.WriteLine($"Updating XInput haptics to {vibeSpeed}");
+            _needXInputRecalc = false;
+            await Dispatcher.Invoke(async () => { await _intifaceTab.Vibrate(vibeSpeed); });
+        }
+
         protected async void OnGVRMessageReceived(object aObj, GHRProtocolMessageContainer aMsg)
         {
             // For now, treat Vive and Oculus clips the same. Assume that if we
@@ -69,6 +117,12 @@ namespace IntifaceGameHapticsRouter
                 {
                     await Dispatcher.Invoke(async () => { await _intifaceTab.Vibrate(1); });
                 }
+            }
+            else if (aMsg.XInputHaptics != null)
+            {
+                _lastXInput = aMsg.XInputHaptics;
+                xinputTimer.Start();
+                _needXInputRecalc = true;
             }
             else if (aMsg.Log != null)
             {

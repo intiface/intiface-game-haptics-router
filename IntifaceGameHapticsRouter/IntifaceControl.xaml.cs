@@ -8,12 +8,9 @@ using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using Buttplug.Client;
-using Buttplug.Client.Connectors;
-using Buttplug.Client.Connectors.WebsocketConnector;
 using Buttplug.Core.Logging;
 using Buttplug.Core.Messages;
 using Buttplug.Server;
-using GHRXInputModInterface;
 using NLog;
 
 namespace IntifaceGameHapticsRouter
@@ -56,8 +53,8 @@ namespace IntifaceGameHapticsRouter
         public EventHandler<string> LogMessageHandler;
         public bool IsConnected => _client.Connected;
 
-        private Vibration _lastVibration = new Vibration();
-        private Vibration _lastSentVibration = new Vibration();
+        private XInputHaptics _lastVibration = new XInputHaptics();
+        private XInputHaptics _lastSentVibration = new XInputHaptics();
         private bool _speedNeedsRecalc = false;
         private Timer commandTimer;
 
