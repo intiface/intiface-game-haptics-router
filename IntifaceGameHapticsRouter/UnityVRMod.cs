@@ -30,7 +30,7 @@ namespace IntifaceGameHapticsRouter
             catch (InjectorException ex)
             {
                 // Noop and just return false.
-                // TODO Maybe log here too.
+                LogManager.GetCurrentClassLogger().Error(ex);
             }
 
             module = IntPtr.Zero;

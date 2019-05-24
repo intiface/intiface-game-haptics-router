@@ -154,7 +154,7 @@ namespace IntifaceGameHapticsRouter
                 catch (Exception ex)
                 {
                     // We've seen weird instances of can't open clipboard
-                    // but it's pretty rare. Log it.
+                    // but it's pretty rare.
                 }
             }
         }
