@@ -11,7 +11,11 @@ namespace GHRUnityVRMod
 {
     public class GHRUnityVRModFuncs
     {
+#if DEBUG
         private static bool _useOutputFile = true;
+#else
+        private static bool _useOutputFile;
+#endif
         private static StreamWriter _outFile;
         private static NamedPipeClientStream _stream;
 
