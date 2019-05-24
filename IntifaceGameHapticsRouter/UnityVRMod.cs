@@ -163,15 +163,17 @@ namespace IntifaceGameHapticsRouter
             await pipeServer.WaitForConnectionAsync().ConfigureAwait(false);
             while (true)
             {
-                var buffer = new byte[4096];
+                // Just make a stupid huge buffer, cause we get some crazy backtraces sometimes.
+                var buffer = new byte[131072];
                 var msg = string.Empty;
                 var len = -1;
-                while (len < 0 || (len == buffer.Length && buffer[4095] != '\0'))
+                while (len < 0 || (len == buffer.Length && buffer[131071] != '\0'))
                 {
                     try
                     {
 
                         len = await pipeServer.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+                        // TODO Actually check that we don't have more left waiting to be read.
                         if (len > 0)
                         {
                             var gvrMsg = GHRProtocolMessageContainer.Deserialize(new MemoryStream(buffer, 0, len));
