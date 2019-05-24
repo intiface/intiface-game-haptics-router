@@ -18,6 +18,7 @@ namespace GHRUnityVRMod
 #endif
         private static StreamWriter _outFile;
         private static NamedPipeClientStream _stream;
+        private static HarmonyInstance _harmony;
 
         static void WriteToStream(GHRProtocolMessageContainer aMsg)
         {
@@ -89,6 +90,46 @@ namespace GHRUnityVRMod
             return type;
         }
 
+        static void Attach(string aTypeName, string aMethodName, Type aPatchClass)
+        {
+            WriteLogToOutput($"Attaching to {aTypeName}.{aMethodName}");
+            try
+            {
+                var originalType = InternalTypeByName(aTypeName);
+                if (originalType == null)
+                {
+                    throw new Exception($"Can't find Type {aTypeName} to patch.");
+                }
+
+                var method = AccessTools.Method(originalType, aMethodName);
+                if (method == null)
+                {
+                    throw new Exception($"Can't find method {aMethodName} to patch.");
+                }
+
+                var postfix = AccessTools.Method(aPatchClass, "PatchFunc");
+                if (postfix == null)
+                {
+                    throw new Exception($"Can't find PatchFunc on type {aPatchClass.Name}.");
+                }
+
+                _harmony.Patch(method, null, new HarmonyMethod(postfix));
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                WriteLogToOutput(ex.ToString());
+                foreach (var lex in ex.LoaderExceptions)
+                {
+                    WriteLogToOutput(lex.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteLogToOutput($"Not attaching to type {aTypeName}: {ex}");
+            }
+            WriteLogToOutput($"Attaching to {aTypeName}.{aMethodName} Successful");
+        }
+
         static void Load()
         {
             if (_useOutputFile)
@@ -108,11 +149,9 @@ namespace GHRUnityVRMod
                 WriteLogToOutput(ex.ToString());
             }
 
-
-            HarmonyInstance harmony;
             try
             {
-                harmony = HarmonyInstance.Create("com.nonpolynomial.buttsaber");
+                _harmony = HarmonyInstance.Create("com.nonpolynomial.intiface_game_haptics_router");
             }
             catch (Exception ex)
             {
@@ -120,82 +159,16 @@ namespace GHRUnityVRMod
                 return;
             }
             
-            WriteLogToOutput("Patching assemblies");
-            try
-            {
-                try
-                {
-                    var original = InternalTypeByName("CVRSystem");
-                    if (original == null)
-                    {
-                        throw new Exception("Can't find CVRSystem!");
-                    }
-
-                    var method = AccessTools.Method(original, "TriggerHapticPulse");
-                    if (method == null)
-                    {
-                        throw new Exception("Can't find TriggerHapticPulse!");
-                    }
-
-                    var postfix = AccessTools.Method(typeof(TriggerHapticPulse_Exfiltration_Patch), "ValvePostfix");
-                    if (postfix == null)
-                    {
-                        throw new Exception("Can't find ValvePostfix!");
-                    }
-
-                    harmony.Patch(method, null, new HarmonyMethod(postfix));
-                }
-                catch (Exception ex)
-                {
-                    WriteLogToOutput($"Not attaching to CVRSystem: {ex}");
-                }
-
-                try
-                {
-                    var original2 = InternalTypeByName("OVRPlugin");
-                    if (original2 == null)
-                    {
-                        throw new Exception("Can't find OVRPlugin!");
-                    }
-                    var method2 = original2.GetMethod("SetControllerHaptics");
-                    if (method2 == null)
-                    {
-                        throw new Exception("Can't find SetControllerHaptics!");
-                    }
-
-                    var postfix2 = AccessTools.Method(typeof(TriggerHapticPulse_Oculus_Exfiltration_Patch), "OculusPostfix");
-                    if (postfix2 == null)
-                    {
-                        throw new Exception("Can't find OculusPostfix!");
-                    }
-
-                    harmony.Patch(method2, null, new HarmonyMethod(postfix2));
-                }
-                catch (Exception ex)
-                {
-                    WriteLogToOutput($"Not attaching to OVRPlugin: {ex}");
-                }
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                WriteLogToOutput(ex.ToString());
-                foreach (var lex in ex.LoaderExceptions)
-                {
-                    WriteLogToOutput(lex.ToString());
-                }
-            }
-            catch (Exception ex)
-            {
-                WriteLogToOutput(ex.ToString());
-                return;
-            }
-
-            WriteLogToOutput("Patched assemblies");
+            WriteLogToOutput("Patching");
+            Attach("CVRSystem", "TriggerHapticPulse", typeof(TriggerHapticPulse_Exfiltration_Patch));
+            Attach("OVRPlugin", "SetControllerHaptics", typeof(TriggerHapticPulse_OculusClip_Exfiltration_Patch));
+            Attach("OVRInput", "SetControllerVibration", typeof(TriggerHapticPulse_OculusInput_Exfiltration_Patch));
+            WriteLogToOutput("Patching successful");
         }
 
         static class TriggerHapticPulse_Exfiltration_Patch
         {
-            public static void ValvePostfix(uint unControllerDeviceIndex, uint unAxisId, char usDurationMicroSec)
+            public static void PatchFunc(uint unControllerDeviceIndex, uint unAxisId, char usDurationMicroSec)
             {
                 // TODO We need to create an instance of GetTrackedDeviceIndexForControllerRole and map Right/Left from ETrackedControllerRole to figure out correct hands here.
                 var viveMsg = new UnityXRViveHaptics
@@ -216,9 +189,9 @@ namespace GHRUnityVRMod
             public int SamplesCount;
         }
 
-        static class TriggerHapticPulse_Oculus_Exfiltration_Patch
+        static class TriggerHapticPulse_OculusClip_Exfiltration_Patch
         {
-            static void OculusPostfix(uint controllerMask, HapticsBuffer hapticsBuffer)
+            static void PatchFunc(uint controllerMask, HapticsBuffer hapticsBuffer)
             {
                 // TODO This won't work if SampleSize != 1. Check Sample Size somewhere.
                 byte[] clipBuffer = new byte[hapticsBuffer.SamplesCount];
@@ -231,54 +204,22 @@ namespace GHRUnityVRMod
             }
         }
 
-        // Output a string of "[l|r],[number]\n" over IPC. No reason to deal with
-        // something like pbufs for this.
-        //
-        // [number] for BeatSaber will be a float between 0-1. We'll use the Vive
-        // interpretation of this, which is a multiplier against 4000 microseconds.
-        // See https://github.com/ValveSoftware/openvr/wiki/IVRSystem::TriggerHapticPulse
-        // for more info. This is weird.
-        //
-        // It might be worth trying to hook this at the OVR/Oculus API level at some
-        // point to make this a more generic solution, but that will mean translating
-        // Oculus haptic clips for games that haven't moved to the new API and I don't
-        // wanna.
-        /*
-        [HarmonyPatch(typeof(VRPlatformHelper), "TriggerHapticPulse")]
-        static class TriggerHapticPulse_Exfiltration_Patch
+        static class TriggerHapticPulse_OculusInput_Exfiltration_Patch
         {
-            static void Postfix(XRNode node, float strength = 1f)
-            {
-                WriteToOutput($"BS: Writing ${strength} to ${node}");
-                var hand = node == XRNode.LeftHand ? "l" : "r";
-                var msg = $"{hand},{strength.ToString()}\n";
-                var b = Encoding.ASCII.GetBytes(msg);
-                _stream.Write(b, 0, b.Length);
-            }
-        }
-        */
-        /* [HarmonyPatch(typeof(OVRPlugin), "SetControllerHaptics")]
-        static class TriggerHapticPulse_Oculus_Exfiltration_Patch
-        {
-            static void Postfix(uint controllerMask, OVRPlugin.HapticsBuffer hapticsBuffer)
-            {
-                WriteToOutput($"OCULUS: Writing ${hapticsBuffer.SamplesCount} samples to ${controllerMask}");
-            }
-        }
+            private static float aLastFrequency;
+            private static float aLastAmplitude;
 
-        
-        [HarmonyPatch(typeof(Valve.VR.CVRSystem), "TriggerHapticPulse")]
-        static class TriggerHapticPulse_Valve_Exfiltration_Patch
-        {
-            static void Postfix(uint unControllerDeviceIndex, uint unAxisId, char usDurationMicroSec)
+            static void PatchFunc(float frequency, float amplitude, uint controllerMask)
             {
-                WriteToOutput($"VALVE: Writing ${usDurationMicroSec} duration to ${unControllerDeviceIndex}");
-                var hand = node == XRNode.LeftHand ? "l" : "r";
-                var msg = $"{hand},{strength.ToString()}\n";
-                var b = Encoding.ASCII.GetBytes(msg);
-                _stream.Write(b, 0, b.Length);
+                if (aLastFrequency == frequency && aLastAmplitude == amplitude)
+                {
+                    return;
+                }
+
+                aLastFrequency = frequency;
+                aLastAmplitude = amplitude;
+                WriteToStream(new GHRProtocolMessageContainer { UnityXROculusInputHaptics = new UnityXROculusInputHaptics(HandSpec.LEFT, frequency, amplitude) });
             }
         }
-        */
     }
 }
