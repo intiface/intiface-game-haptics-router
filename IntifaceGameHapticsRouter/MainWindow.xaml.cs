@@ -60,7 +60,7 @@ namespace IntifaceGameHapticsRouter
             // buffers yet, as there's no way our older motors can spin up/down
             // at the speed of HD rumble. Once we get Nintendo Joycon support,
             // this may change.
-            if (aMsg.UnityXRViveHaptics != null || aMsg.UnityXROculusClipHaptics != null)
+            if (aMsg.UnityXRViveHaptics != null || aMsg.UnityXROculusClipHaptics != null || aMsg.UnityXROculusInputHaptics != null)
             {
                 var isEnabled = vrTimer.Enabled;
                 vrTimer.Stop();
