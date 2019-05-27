@@ -107,7 +107,7 @@ namespace GHRUnityVRMod
                     throw new Exception($"Can't find method {aMethodName} to patch.");
                 }
 
-                var postfix = AccessTools.Method(aPatchClass, "PatchFunc");
+                var postfix = AccessTools.Method(aPatchClass, "Postfix");
                 if (postfix == null)
                 {
                     throw new Exception($"Can't find PatchFunc on type {aPatchClass.Name}.");
@@ -160,20 +160,41 @@ namespace GHRUnityVRMod
             }
             
             WriteLogToOutput("Patching");
-            Attach("CVRSystem", "TriggerHapticPulse", typeof(TriggerHapticPulse_Exfiltration_Patch));
+            Attach("CVRSystem", "TriggerHapticPulse", typeof(TriggerHapticPulse_OpenVR_char_Exfiltration_Patch));
+            Attach("CVRSystem", "TriggerHapticPulse", typeof(TriggerHapticPulse_OpenVR_ushort_Exfiltration_Patch));
+            Attach("CVRInput", "TriggerHapticVibrationAction", typeof(TriggerHapticVibrationAction_Patch));
             Attach("OVRPlugin", "SetControllerHaptics", typeof(TriggerHapticPulse_OculusClip_Exfiltration_Patch));
             Attach("OVRInput", "SetControllerVibration", typeof(TriggerHapticPulse_OculusInput_Exfiltration_Patch));
+            
             WriteLogToOutput("Patching successful");
         }
 
-        static class TriggerHapticPulse_Exfiltration_Patch
+        static class TriggerHapticPulse_OpenVR_char_Exfiltration_Patch
         {
-            public static void PatchFunc(uint unControllerDeviceIndex, uint unAxisId, char usDurationMicroSec)
+            public static void Postfix(uint unControllerDeviceIndex, uint unAxisId, char usDurationMicroSec)
             {
                 // TODO We need to create an instance of GetTrackedDeviceIndexForControllerRole and map Right/Left from ETrackedControllerRole to figure out correct hands here.
                 var viveMsg = new UnityXRViveHaptics
                 {
                     Duration = usDurationMicroSec, Hand = HandSpec.LEFT
+                };
+                WriteToStream(new GHRProtocolMessageContainer
+                {
+                    UnityXRViveHaptics = viveMsg
+                });
+            }
+        }
+
+        static class TriggerHapticPulse_OpenVR_ushort_Exfiltration_Patch
+        {
+            public static void Postfix(uint unControllerDeviceIndex, uint unAxisId, ushort usDurationMicroSec)
+            {
+                WriteLogToOutput("Got OpenVR ushort");
+                // TODO We need to create an instance of GetTrackedDeviceIndexForControllerRole and map Right/Left from ETrackedControllerRole to figure out correct hands here.
+                var viveMsg = new UnityXRViveHaptics
+                {
+                    Duration = usDurationMicroSec,
+                    Hand = HandSpec.LEFT
                 };
                 WriteToStream(new GHRProtocolMessageContainer
                 {
@@ -191,7 +212,7 @@ namespace GHRUnityVRMod
 
         static class TriggerHapticPulse_OculusClip_Exfiltration_Patch
         {
-            static void PatchFunc(uint controllerMask, HapticsBuffer hapticsBuffer)
+            static void Postfix(uint controllerMask, HapticsBuffer hapticsBuffer)
             {
                 // TODO This won't work if SampleSize != 1. Check Sample Size somewhere.
                 byte[] clipBuffer = new byte[hapticsBuffer.SamplesCount];
@@ -209,7 +230,7 @@ namespace GHRUnityVRMod
             private static float aLastFrequency;
             private static float aLastAmplitude;
 
-            static void PatchFunc(float frequency, float amplitude, uint controllerMask)
+            static void Postfix(float frequency, float amplitude, uint controllerMask)
             {
                 if (aLastFrequency == frequency && aLastAmplitude == amplitude)
                 {
@@ -219,6 +240,15 @@ namespace GHRUnityVRMod
                 aLastFrequency = frequency;
                 aLastAmplitude = amplitude;
                 WriteToStream(new GHRProtocolMessageContainer { UnityXROculusInputHaptics = new UnityXROculusInputHaptics(HandSpec.LEFT, frequency, amplitude) });
+            }
+        }
+
+        static class TriggerHapticVibrationAction_Patch
+        {
+            static void Postfix(ulong action, float fStartSecondsFromNow, float fDurationSeconds, float fFrequency,
+                float fAmplitude, ulong ulRestrictToDevice)
+            {
+                WriteLogToOutput("Got TriggerHapticVibrationAction");
             }
         }
     }
