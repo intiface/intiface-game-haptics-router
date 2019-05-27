@@ -56,22 +56,22 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Buttplug, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.0.4.4\lib\net47\Buttplug.dll</HintPath>
+      <HintPath>..\packages\Buttplug.0.4.5\lib\net47\Buttplug.dll</HintPath>
     </Reference>
     <Reference Include="Buttplug.Client.Connectors.WebsocketConnector, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.Client.Connectors.WebsocketConnector.0.4.4\lib\net47\Buttplug.Client.Connectors.WebsocketConnector.dll</HintPath>
+      <HintPath>..\packages\Buttplug.Client.Connectors.WebsocketConnector.0.4.5\lib\net47\Buttplug.Client.Connectors.WebsocketConnector.dll</HintPath>
     </Reference>
     <Reference Include="Buttplug.Server.Managers.HidSharpManager, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.Server.Managers.HidSharpManager.0.4.4\lib\net47\Buttplug.Server.Managers.HidSharpManager.dll</HintPath>
+      <HintPath>..\packages\Buttplug.Server.Managers.HidSharpManager.0.4.5\lib\net47\Buttplug.Server.Managers.HidSharpManager.dll</HintPath>
     </Reference>
     <Reference Include="Buttplug.Server.Managers.UWPBluetoothManager, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.Server.Managers.UWPBluetoothManager.0.4.4\lib\net47\Buttplug.Server.Managers.UWPBluetoothManager.dll</HintPath>
+      <HintPath>..\packages\Buttplug.Server.Managers.UWPBluetoothManager.0.4.5\lib\net47\Buttplug.Server.Managers.UWPBluetoothManager.dll</HintPath>
     </Reference>
     <Reference Include="Buttplug.Server.Managers.WinUSBManager, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.Server.Managers.WinUSBManager.0.4.4\lib\net47\Buttplug.Server.Managers.WinUSBManager.dll</HintPath>
+      <HintPath>..\packages\Buttplug.Server.Managers.WinUSBManager.0.4.5\lib\net47\Buttplug.Server.Managers.WinUSBManager.dll</HintPath>
     </Reference>
     <Reference Include="Buttplug.Server.Managers.XInputGamepadManager, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.Server.Managers.XInputGamepadManager.0.4.4\lib\net47\Buttplug.Server.Managers.XInputGamepadManager.dll</HintPath>
+      <HintPath>..\packages\Buttplug.Server.Managers.XInputGamepadManager.0.4.5\lib\net47\Buttplug.Server.Managers.XInputGamepadManager.dll</HintPath>
     </Reference>
     <Reference Include="deniszykov.WebSocketListener, Version=4.2.4.0, Culture=neutral, PublicKeyToken=7f78616efb4a208d, processorArchitecture=MSIL">
       <HintPath>..\packages\deniszykov.WebSocketListener.4.2.4\lib\net45\deniszykov.WebSocketListener.dll</HintPath>
