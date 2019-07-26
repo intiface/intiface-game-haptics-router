@@ -1,3 +1,17 @@
+# v3 (2019-07-25)
+
+## Features
+
+- Updated Buttplug dependency to 0.4.7
+- Readded Multiplier/Baseline capabilities
+- Added update checking for github releases
+
+## Bugfixes
+
+- Multiplier now shown in visualizer
+- Baseline will continue to run even if no vibration
+- Fixed release name in CI
+
 # v2 (2019-05-26)
 
 ## Features
