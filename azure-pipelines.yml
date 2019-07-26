@@ -91,7 +91,7 @@ jobs:
           repositoryName: "intiface/intiface-game-haptics-router"
           action: "create"
           tagSource: "auto"
-          title: "Intiface Game Vibration Router $(gitVersion)"
+          title: "Intiface Game Haptics Router $(gitVersion)"
           assets: |
             $(System.ArtifactsDirectory)\**\*.zip
             $(System.ArtifactsDirectory)\**\*installer.exe
