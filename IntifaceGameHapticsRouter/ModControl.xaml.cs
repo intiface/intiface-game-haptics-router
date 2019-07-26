@@ -63,9 +63,9 @@ namespace IntifaceGameHapticsRouter
 
         private ProcessInfoList _processList = new ProcessInfoList();
 
-        public event EventHandler<int> ProcessAttachRequested;
+        public event EventHandler<EventArgs> ProcessAttached;
 
-        public event EventHandler<bool> ProcessDetachRequested;
+        public event EventHandler<EventArgs> ProcessDetached;
 
         private bool _attached;
         private readonly Logger _log;
@@ -187,11 +187,13 @@ namespace IntifaceGameHapticsRouter
             if (!_attached)
             {
                 var process = ProcessListBox.SelectedItems.Cast<ProcessInfo>().ToList();
+                var attached = false;
                 if (process[0].CanUseMono)
                 {
                     _unityMod = new UnityVRMod();
                     _unityMod.MessageReceivedHandler += OnMessageReceived;
                     _unityMod.Inject(process[0].Id, process[0].FrameworkVersion, process[0].MonoModule);
+                    attached = true;
                 }
 
                 if (process[0].CanUseXInput)
@@ -199,10 +201,17 @@ namespace IntifaceGameHapticsRouter
                     _xinputMod = new XInputMod();
                     _xinputMod.Attach(process[0].Id);
                     _xinputMod.MessageReceivedHandler += OnMessageReceived;
+                    attached = true;
+                }
+
+                if (attached)
+                {
+                    ProcessAttached?.Invoke(this, null);
                 }
             }
             else
             {
+                ProcessDetached?.Invoke(this, null);
                 Detach();
             }
         }

@@ -120,5 +120,16 @@ namespace IntifaceGameHapticsRouter
         {
             PassthruChanged?.Invoke(this, PassthruCheckBox.IsChecked.Value);
         }
+
+        private void BaselineSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            BaselineChanged?.Invoke(this, Baseline);
+        }
+
+
+        private void MultiplierSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            MultiplierChanged?.Invoke(this, Multiplier);
+        }
     }
 }

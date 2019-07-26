@@ -16,7 +16,7 @@ namespace IntifaceGameHapticsRouter
         private readonly NLog.Logger _log;
         private Timer vrTimer = new Timer();
         private Timer xinputTimer = new Timer();
-        private XInputHaptics _lastXInput;
+        private XInputHaptics _lastXInput = new XInputHaptics(0, 0);
         private bool _needXInputRecalc;
         private double _multiplier;
         private double _baseline;
@@ -45,12 +45,24 @@ namespace IntifaceGameHapticsRouter
 
             _intifaceTab.LogMessageHandler += OnLogMessage;
             _modTab.MessageReceivedHandler += OnGVRMessageReceived;
+            _modTab.ProcessAttached += OnProcessAttached;
+            _modTab.ProcessDetached += OnProcessDetached;
             _graphTab.MultiplierChanged += OnMultiplierChanged;
             _graphTab.BaselineChanged += OnBaselineChanged;
             _multiplier = _graphTab.Multiplier;
             _baseline = _graphTab.Baseline;
             //_graphTab.PassthruChanged += PassthruChanged;
             _log.Info("Application started.");
+        }
+
+        protected void OnProcessAttached(object aObj, EventArgs aNull)
+        {
+            _graphTab.StartUpdates();
+        }
+
+        protected void OnProcessDetached(object aObj, EventArgs aNull)
+        {
+            _graphTab.StopUpdates();
         }
 
         protected void OnMultiplierChanged(object aObj, double aValue)
@@ -63,6 +75,10 @@ namespace IntifaceGameHapticsRouter
         {
             _needXInputRecalc = true;
             _baseline = aValue;
+            if (!xinputTimer.Enabled)
+            {
+                xinputTimer.Start();
+            }
         }
 
         protected void OnLogMessage(object aObj, string aMsg)
@@ -84,10 +100,14 @@ namespace IntifaceGameHapticsRouter
             }
             
             // If we've received an off packet, just assume we won't be updating again until we get something new.
-            if (_lastXInput.LeftMotor == 0 && _lastXInput.RightMotor == 0)
+            if (_lastXInput.LeftMotor == 0 && _lastXInput.RightMotor == 0 && _baseline == 0)
             {
                 xinputTimer.Stop();
             }
+
+            _graphTab.UpdateVibrationValues(
+                Math.Max((uint)(_lastXInput.LeftMotor * _multiplier), (uint)(_baseline * 65535.0)),
+                Math.Max((uint)(_lastXInput.RightMotor * _multiplier), (uint)(_baseline * 65535.0)));
 
             var averageVibeSpeed = (_lastXInput.LeftMotor + _lastXInput.RightMotor) / (2.0 * 65535.0);
 
