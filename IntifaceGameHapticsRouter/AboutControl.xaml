@@ -11,13 +11,22 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" Height="auto" Width="auto">
-            <Span FontSize="19" FontWeight="Bold">Intiface Game Haptics Router v1</Span><LineBreak />
+        <GroupBox Grid.Row="0" Name="AboutGroup" Width="auto" Height="auto" Padding="5" Header="About">
+            <Grid Background="White" Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"></RowDefinition>
+                    <RowDefinition Height="auto"></RowDefinition>
+                    <RowDefinition Height="auto"></RowDefinition>
+                    <RowDefinition Height="auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" Height="auto" Width="auto">
+            <Span FontSize="19" FontWeight="Bold">Intiface Game Haptics Router v3</Span><LineBreak />
             By <Hyperlink NavigateUri="https://metafetish.com" RequestNavigate="Hyperlink_RequestNavigate">Nonpolynomial Labs, LLC</Hyperlink><LineBreak />
             <LineBreak/>
             Software updates at <Hyperlink NavigateUri="https://ghr.intiface.io" RequestNavigate="Hyperlink_RequestNavigate">https://ghr.intiface.io/</Hyperlink><LineBreak/>
@@ -30,8 +39,23 @@
             <Hyperlink NavigateUri="https://patreon.com/qdot" RequestNavigate="Hyperlink_RequestNavigate">Support this project on Patreon!</Hyperlink>
             <LineBreak/>
             <LineBreak/>
-        </TextBlock>
-        <Label Grid.Row="1">Build Time: (If this looks old, check update link above for possible new versions)</Label>
-        <Label Grid.Row="2" Name="_buildDate">Test</Label>
+                </TextBlock>
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="1" Name="UpdateGroup" Width="auto" Height="auto" Padding="5" Header="Updates">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Row="0" Name="CheckForUpdates" Content="Check now" Width="auto" HorizontalAlignment="Left" Margin="0,0" Grid.Column="0" Click="CheckForUpdates_OnClick"/>
+                <Label Grid.Row="1" Content="Status:" Width="auto" HorizontalAlignment="Left" Margin="0,0" Grid.Column="0"/>
+                <TextBlock Grid.Row="1" Width="auto" Name="UpdateCheckStatus" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0"  Grid.Column="1">No check performed</TextBlock>
+            </Grid>
+        </GroupBox>
     </Grid>
 </UserControl>

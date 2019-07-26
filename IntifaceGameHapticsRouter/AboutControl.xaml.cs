@@ -1,6 +1,11 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
+using NLog;
+using Octokit;
 
 namespace IntifaceGameHapticsRouter
 {
@@ -9,11 +14,45 @@ namespace IntifaceGameHapticsRouter
     /// </summary>
     public partial class AboutControl : UserControl
     {
+        private string _currentVersion = "v3";
+
         public AboutControl()
         {
             InitializeComponent();
+        }
 
-            _buildDate.Content = Properties.Resources.BuildDate;
+        public async Task CheckForUpdate()
+        {
+            try
+            {
+                var client = new Octokit.GitHubClient(new ProductHeaderValue($"IntifaceGameHapticsRouter{_currentVersion}"));
+                var release = await client.Repository.Release.GetLatest("intiface", "intiface-game-haptics-router");
+                if (release.TagName != _currentVersion)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        if (MessageBox.Show("A new GHR update is available! Would you like to go to the update site?",
+                                "GHR Update",
+                                MessageBoxButton.YesNo,
+                                MessageBoxImage.Asterisk) == MessageBoxResult.Yes)
+                        {
+                            var link = new Hyperlink(
+                                new Run("https://github.com/intiface/intiface-game-haptics-router/releases"))
+                            {
+                                NavigateUri =
+                                    new Uri("https://github.com/intiface/intiface-game-haptics-router/releases")
+                            };
+                            link.RequestNavigate += Hyperlink_RequestNavigate;
+                            link.DoClick();
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                var log = LogManager.GetCurrentClassLogger();
+                log.Error($"Cannot run update check: {ex.Message}");
+            }
         }
 
         private void TryUri(string aUri)
@@ -31,6 +70,11 @@ namespace IntifaceGameHapticsRouter
         private void Hyperlink_RequestNavigate(object aSender, System.Windows.Navigation.RequestNavigateEventArgs aEvent)
         {
             TryUri(aEvent.Uri.AbsoluteUri);
+        }
+
+        private async void CheckForUpdates_OnClick(object sender, RoutedEventArgs e)
+        {
+            await CheckForUpdate();
         }
     }
 }

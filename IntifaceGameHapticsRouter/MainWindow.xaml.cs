@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using NLog;
@@ -20,6 +21,8 @@ namespace IntifaceGameHapticsRouter
         private bool _needXInputRecalc;
         private double _multiplier;
         private double _baseline;
+        private Task _updateTask;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -53,6 +56,7 @@ namespace IntifaceGameHapticsRouter
             _baseline = _graphTab.Baseline;
             //_graphTab.PassthruChanged += PassthruChanged;
             _log.Info("Application started.");
+            _updateTask = _aboutTab.CheckForUpdate();
         }
 
         protected void OnProcessAttached(object aObj, EventArgs aNull)
