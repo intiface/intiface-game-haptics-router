@@ -55,23 +55,23 @@
     <ApplicationIcon>intiface-ghr-logo-1.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Buttplug, Version=0.4.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.0.4.7\lib\net47\Buttplug.dll</HintPath>
+    <Reference Include="Buttplug, Version=0.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Buttplug.0.5.1\lib\net47\Buttplug.dll</HintPath>
     </Reference>
-    <Reference Include="Buttplug.Client.Connectors.WebsocketConnector, Version=0.4.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.Client.Connectors.WebsocketConnector.0.4.7\lib\net47\Buttplug.Client.Connectors.WebsocketConnector.dll</HintPath>
+    <Reference Include="Buttplug.Client.Connectors.WebsocketConnector, Version=0.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Buttplug.Client.Connectors.WebsocketConnector.0.5.1\lib\net47\Buttplug.Client.Connectors.WebsocketConnector.dll</HintPath>
     </Reference>
-    <Reference Include="Buttplug.Server.Managers.HidSharpManager, Version=0.4.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.Server.Managers.HidSharpManager.0.4.7\lib\net47\Buttplug.Server.Managers.HidSharpManager.dll</HintPath>
+    <Reference Include="Buttplug.Server.Managers.HidSharpManager, Version=0.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Buttplug.Server.Managers.HidSharpManager.0.5.1\lib\net47\Buttplug.Server.Managers.HidSharpManager.dll</HintPath>
     </Reference>
-    <Reference Include="Buttplug.Server.Managers.UWPBluetoothManager, Version=0.4.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.Server.Managers.UWPBluetoothManager.0.4.7\lib\net47\Buttplug.Server.Managers.UWPBluetoothManager.dll</HintPath>
+    <Reference Include="Buttplug.Server.Managers.UWPBluetoothManager, Version=0.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Buttplug.Server.Managers.UWPBluetoothManager.0.5.1\lib\net47\Buttplug.Server.Managers.UWPBluetoothManager.dll</HintPath>
     </Reference>
-    <Reference Include="Buttplug.Server.Managers.WinUSBManager, Version=0.4.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.Server.Managers.WinUSBManager.0.4.7\lib\net47\Buttplug.Server.Managers.WinUSBManager.dll</HintPath>
+    <Reference Include="Buttplug.Server.Managers.WinUSBManager, Version=0.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Buttplug.Server.Managers.WinUSBManager.0.5.1\lib\net47\Buttplug.Server.Managers.WinUSBManager.dll</HintPath>
     </Reference>
-    <Reference Include="Buttplug.Server.Managers.XInputGamepadManager, Version=0.4.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.Server.Managers.XInputGamepadManager.0.4.7\lib\net47\Buttplug.Server.Managers.XInputGamepadManager.dll</HintPath>
+    <Reference Include="Buttplug.Server.Managers.XInputGamepadManager, Version=0.5.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Buttplug.Server.Managers.XInputGamepadManager.0.5.1\lib\net47\Buttplug.Server.Managers.XInputGamepadManager.dll</HintPath>
     </Reference>
     <Reference Include="deniszykov.WebSocketListener, Version=4.2.4.0, Culture=neutral, PublicKeyToken=7f78616efb4a208d, processorArchitecture=MSIL">
       <HintPath>..\packages\deniszykov.WebSocketListener.4.2.4\lib\net45\deniszykov.WebSocketListener.dll</HintPath>
@@ -97,20 +97,20 @@
     <Reference Include="MaterialDesignThemes.Wpf, Version=2.6.0.325, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MaterialDesignThemes.2.6.0\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="Namotion.Reflection, Version=1.0.5.0, Culture=neutral, PublicKeyToken=c2f9c3bdfae56102, processorArchitecture=MSIL">
-      <HintPath>..\packages\Namotion.Reflection.1.0.5\lib\net45\Namotion.Reflection.dll</HintPath>
+    <Reference Include="Namotion.Reflection, Version=1.0.6.0, Culture=neutral, PublicKeyToken=c2f9c3bdfae56102, processorArchitecture=MSIL">
+      <HintPath>..\packages\Namotion.Reflection.1.0.6\lib\net45\Namotion.Reflection.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="NJsonSchema, Version=10.0.21.0, Culture=neutral, PublicKeyToken=c2f9c3bdfae56102, processorArchitecture=MSIL">
-      <HintPath>..\packages\NJsonSchema.10.0.21\lib\net45\NJsonSchema.dll</HintPath>
+    <Reference Include="NJsonSchema, Version=10.0.24.0, Culture=neutral, PublicKeyToken=c2f9c3bdfae56102, processorArchitecture=MSIL">
+      <HintPath>..\packages\NJsonSchema.10.0.24\lib\net45\NJsonSchema.dll</HintPath>
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLog.4.6.6\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.6.7\lib\net45\NLog.dll</HintPath>
     </Reference>
-    <Reference Include="Octokit, Version=0.32.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Octokit.0.32.0\lib\net45\Octokit.dll</HintPath>
+    <Reference Include="Octokit, Version=0.34.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Octokit.0.34.0\lib\net45\Octokit.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpDX.4.2.0\lib\net45\SharpDX.dll</HintPath>
@@ -128,8 +128,8 @@
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.6.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Threading.Tasks.Dataflow.4.9.0\lib\netstandard2.0\System.Threading.Tasks.Dataflow.dll</HintPath>
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.6.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Dataflow.4.10.0\lib\netstandard2.0\System.Threading.Tasks.Dataflow.dll</HintPath>
     </Reference>
     <Reference Include="System.Transactions" />
     <Reference Include="System.Windows.Forms" />
@@ -148,8 +148,8 @@
     <Reference Include="WinUSBNet, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\WinUSBNet.1.0.3\lib\net35\WinUSBNet.dll</HintPath>
     </Reference>
-    <Reference Include="YamlDotNet, Version=6.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
-      <HintPath>..\packages\YamlDotNet.6.1.2\lib\net45\YamlDotNet.dll</HintPath>
+    <Reference Include="YamlDotNet, Version=7.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.7.0.0\lib\net45\YamlDotNet.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
