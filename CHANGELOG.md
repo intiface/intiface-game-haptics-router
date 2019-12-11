@@ -1,3 +1,17 @@
+# v5 (2019-12-10)
+
+## Features
+
+- Updated Buttplug dependency to 0.5.6
+- Updated other dependencies
+
+# v4 (2019-09-28)
+
+## Features
+
+- Updated Buttplug dependency to 0.5.1
+- Updated other dependencies
+
 # v3 (2019-07-25)
 
 ## Features
