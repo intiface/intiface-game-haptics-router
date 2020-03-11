@@ -17,12 +17,13 @@ namespace GHRXInputModPayload
         private static Exception _ex;
         private static GHRXInputModPayload _instance;
 
-        // Search newest to oldest. It seems that some games link both xinput1_4 and xinput9_1_0, but seem to 
-        // prefer xinput9_1_0? Not quite sure about difference yet. 
+        // Use 1_3 first, seems to be most popular. It seems that some games
+        // link both xinput1_4 and xinput9_1_0, but seem to prefer xinput9_1_0?
+        // Not quite sure about difference yet. 
         private enum XInputVersion
         {
-            xinput9_1_0,
             xinput1_3,
+            xinput9_1_0,
             xinput1_4
         };
 
