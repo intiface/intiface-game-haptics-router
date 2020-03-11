@@ -1,3 +1,9 @@
+# v6 (2020-03-10)
+
+## Bugfixes
+
+- Reprioritize load order of XInput DLLs
+
 # v5 (2019-12-10)
 
 ## Features
