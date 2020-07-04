@@ -1,3 +1,13 @@
+# v7 (2020-07-04)
+
+## Features
+
+- Update Buttplug dependency to 0.5.9
+
+## Bugfixes
+
+- Add VR haptics detection for .Net Standard Unity games
+
 # v6 (2020-03-10)
 
 ## Bugfixes
