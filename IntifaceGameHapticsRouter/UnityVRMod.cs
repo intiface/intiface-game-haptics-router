@@ -50,7 +50,6 @@ namespace IntifaceGameHapticsRouter
 
         protected static bool GetNetFrameworkVersion(string aProcessPath, out NetFramework frameworkVersion)
         {
-            
             // If someone is asking us this, we can assume they've already checked they can use this mod.
             // We'll also assume it's Unity, and that there's an Assembly-CSharp.dll file somewhere in the tree below the process file.
             Path.GetDirectoryName(aProcessPath);
@@ -58,6 +57,13 @@ namespace IntifaceGameHapticsRouter
                 SearchOption.AllDirectories);
             if (assemblyFiles.Length == 0)
             {
+                // See if there's a netstandard DLL. Newer Unity games can compile against either Mono or .Net Standard, and if it's .Net 
+                // Standard we're fine going with the NET45 mod. This is a horrible hack, but really, what isn't in this program.
+                if (Directory.GetFiles(Path.GetDirectoryName(aProcessPath), "*netstandard.dll", SearchOption.AllDirectories).Length > 0)
+                {
+                    frameworkVersion = NetFramework.NET45;
+                    return true;
+                }
                 frameworkVersion = NetFramework.UNKNOWN;
                 return false;
             }
