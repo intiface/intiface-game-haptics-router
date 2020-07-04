@@ -43,7 +43,7 @@ jobs:
           targetType: inline
           script: |
             Set-Alias Signtool 'C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe'
-            Signtool sign /f SigningCert.pfx /p "$(NPLabsRepoSigningKey)" /tr http://timestamp.comodoca.com/rfc3161 $(System.DefaultWorkingDirectory)\IntifaceGameHapticsRouter\bin\$(buildConfiguration)\IntifaceGameHapticsRouter.exe
+            Signtool sign /f SigningCert.pfx /p "$(NPLabsRepoSigningKey)" /td sha256 /tr http://timestamp.comodoca.com/rfc3161 $(System.DefaultWorkingDirectory)\IntifaceGameHapticsRouter\bin\$(buildConfiguration)\IntifaceGameHapticsRouter.exe
       - task: PowerShell@2
         displayName: "Build Installer"
         inputs:
@@ -60,7 +60,7 @@ jobs:
           targetType: inline
           script: |
             Set-Alias Signtool 'C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe'
-            Signtool sign /f SigningCert.pfx /p "$(NPLabsRepoSigningKey)" /tr http://timestamp.comodoca.com/rfc3161 $(System.DefaultWorkingDirectory)\installer\$(cliBuildName)-installer.exe
+            Signtool sign /f SigningCert.pfx /p "$(NPLabsRepoSigningKey)" /td sha256 /tr http://timestamp.comodoca.com/rfc3161 $(System.DefaultWorkingDirectory)\installer\$(cliBuildName)-installer.exe
       - task: CopyFiles@2
         displayName: "Copy installer to staging"
         inputs:
