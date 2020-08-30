@@ -10,7 +10,7 @@ namespace GHRXInputModPayload
     public class GHRXInputModPayload : IEntryPoint
     {
         private readonly GHRXInputModInterface.GHRXInputModInterface _interface;
-        private LocalHook _xinputSetStateHookObj;
+        private List<LocalHook> _xinputSetStateHookObj = new List<LocalHook>();
         private Vibration _lastMessage = new Vibration { LeftMotorSpeed = 65535, RightMotorSpeed = 65535 };
         private static bool _shouldPassthru = true;
         private readonly Queue<Vibration> _messageQueue = new Queue<Vibration>();
@@ -22,12 +22,10 @@ namespace GHRXInputModPayload
         // Not quite sure about difference yet. 
         private enum XInputVersion
         {
+            xinput1_4,
             xinput1_3,
             xinput9_1_0,
-            xinput1_4
         };
-
-        private static XInputVersion _hookedVersion;
 
         public GHRXInputModPayload(
             RemoteHooking.IContext aInContext,
@@ -48,13 +46,35 @@ namespace GHRXInputModPayload
                 try
                 {
                     _interface.Ping(RemoteHooking.GetCurrentProcessId(), $"Trying to hook {xinputVersion}.dll");
-                    _xinputSetStateHookObj = LocalHook.Create(
-                        LocalHook.GetProcAddress($"{xinputVersion}.dll", "XInputSetState"),
-                        new XInputSetStateDelegate(XInputSetStateHookFunc),
-                        null);
-                    _hookedVersion = (XInputVersion)xinputVersion;
+                    LocalHook hook = null;
+                    switch ((XInputVersion)xinputVersion)
+                    {
+                        case XInputVersion.xinput1_3:
+                            hook = LocalHook.Create(
+                                LocalHook.GetProcAddress($"{xinputVersion}.dll", "XInputSetState"),
+                                new XInputSetStateDelegate(XInputSetStateHookFunc1_3),
+                                null);
+                            break;
+                        case XInputVersion.xinput1_4:
+                            hook = LocalHook.Create(
+                                LocalHook.GetProcAddress($"{xinputVersion}.dll", "XInputSetState"),
+                                new XInputSetStateDelegate(XInputSetStateHookFunc1_4),
+                                null);
+                            break;
+                        case XInputVersion.xinput9_1_0:
+                            hook = LocalHook.Create(
+                                LocalHook.GetProcAddress($"{xinputVersion}.dll", "XInputSetState"),
+                                new XInputSetStateDelegate(XInputSetStateHookFunc9_1_0),
+                                null);
+                            break;
+                    };
+                    if (hook == null)
+                    {
+                        continue;
+                    }
+                    hook.ThreadACL.SetExclusiveACL(new Int32[1]);
+                    _xinputSetStateHookObj.Add(hook);
                     _interface.Ping(RemoteHooking.GetCurrentProcessId(), $"Hooked {xinputVersion}.dll");
-                    break;
                 }
                 catch
                 {
@@ -68,7 +88,7 @@ namespace GHRXInputModPayload
                 return;
             }
             // Set hook for all threads.
-            _xinputSetStateHookObj.ThreadACL.SetExclusiveACL(new Int32[1]);
+
             try
             {
                 while (_interface.Ping(RemoteHooking.GetCurrentProcessId(), ""))
@@ -107,33 +127,57 @@ namespace GHRXInputModPayload
         [DllImport("xinput9_1_0.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "XInputSetState")]
         private static extern unsafe int XInputSetState9_1_0(int arg0, void* arg1);
 
-        private static unsafe int XInputSetStateShim(int aUserIndex, Vibration aVibrationRef)
-        {
-            switch (_hookedVersion)
-            {
-                case XInputVersion.xinput1_3:
-                    return XInputSetState1_3(aUserIndex, &aVibrationRef);
-                case XInputVersion.xinput1_4:
-                    return XInputSetState1_4(aUserIndex, &aVibrationRef);
-                case XInputVersion.xinput9_1_0:
-                    return XInputSetState9_1_0(aUserIndex, &aVibrationRef);
-            }
-            return 0;
-        }
-
         [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
         delegate uint XInputSetStateDelegate(int aGamePadIndex, ref Vibration aVibrationRef);
 
-        private static uint XInputSetStateHookFunc(int aGamePadIndex, ref Vibration aVibrationRef)
+        // I was having problems figuring out how to de-ref aVibrationRef to do the void* conversion, so this is the long way.
+        // This code rarely changes, so fuck it. It works.
+        private static unsafe uint XInputSetStateHookFunc1_3(int aGamePadIndex, ref Vibration aVibrationRef)
+        {
+            if (_shouldPassthru)
+            {
+                RunXInputSetState1_3(aGamePadIndex, aVibrationRef);
+            }
+            return XInputSetStateHookFunc(aGamePadIndex, aVibrationRef);
+        }
+
+        private static unsafe int RunXInputSetState1_3(int aGamePadIndex, Vibration aVibration)
+        {
+            return XInputSetState1_3(aGamePadIndex, &aVibration);
+        }
+
+        private static unsafe uint XInputSetStateHookFunc1_4(int aGamePadIndex, ref Vibration aVibrationRef)
+        {
+            if (_shouldPassthru)
+            {
+                RunXInputSetState1_4(aGamePadIndex, aVibrationRef);
+            }
+            return XInputSetStateHookFunc(aGamePadIndex, aVibrationRef);
+        }
+
+        private static unsafe int RunXInputSetState1_4(int aGamePadIndex, Vibration aVibration)
+        {
+            return XInputSetState1_4(aGamePadIndex, &aVibration);
+        }
+
+        private static unsafe uint XInputSetStateHookFunc9_1_0(int aGamePadIndex, ref Vibration aVibrationRef)
+        {
+            if (_shouldPassthru)
+            {
+                RunXInputSetState9_1_0(aGamePadIndex, aVibrationRef);
+            }
+            return XInputSetStateHookFunc(aGamePadIndex, aVibrationRef);
+        }
+
+        private static unsafe int RunXInputSetState9_1_0(int aGamePadIndex, Vibration aVibration)
+        {
+            return XInputSetState1_3(aGamePadIndex, &aVibration);
+        }
+
+        private static uint XInputSetStateHookFunc(int aGamePadIndex, Vibration aVibrationRef)
         {
             try
             {
-                // Always send to the controller first, then do what we need to.
-                if (_shouldPassthru)
-                {
-                    XInputSetStateShim(aGamePadIndex, aVibrationRef);
-                }
-
                 GHRXInputModPayload This = _instance;
                 // No reason to send duplicate packets.
                 if (This._lastMessage.LeftMotorSpeed == aVibrationRef.LeftMotorSpeed &&
