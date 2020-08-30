@@ -13,6 +13,11 @@ other events from video games to control sex hardware supported by the
 - Games using Windows XInput (Xbox Gamepads)
 - Games using Unity VR (Any Version)
 
+Toys that support vibration or rotation are supported by the GHR:
+
+- [List of supported vibrating toys](https://iostindex.com/?filter0Features=OutputsVibrators&filter1ButtplugSupport=1)
+- [List of supported rotating toys](https://iostindex.com/?filter0Features=OutputsRotators&filter1ButtplugSupport=1)
+
 Releases can be downloaded [on the releases page.](https://github.com/intiface/intiface-game-haptics-router/releases)
 
 ## Table Of Contents

@@ -1,3 +1,17 @@
+# v8 (2020-08-30)
+
+## Features
+
+- Add simple, single direction rotation support
+
+## Bugfixes
+
+- XInput hook now tries to hook all DLL versions, not just first
+  found.
+  - Some games bind to multiple DLLs, like xinput1_3 and xinput1_4. We
+    hook all found DLLs now, expect that we'll only get one input back
+    from a process.
+
 # v7 (2020-07-04)
 
 ## Features
