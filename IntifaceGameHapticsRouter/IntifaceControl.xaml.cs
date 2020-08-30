@@ -221,6 +221,10 @@ namespace IntifaceGameHapticsRouter
                 {
                     await deviceItem.Device.SendVibrateCmd(aSpeed);
                 }
+                if (deviceItem.IsChecked && deviceItem.Device.AllowedMessages.ContainsKey(typeof(RotateCmd)))
+                {
+                    await deviceItem.Device.SendRotateCmd(aSpeed, true);
+                }
             }
         }
 
