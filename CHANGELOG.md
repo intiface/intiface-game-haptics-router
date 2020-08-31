@@ -1,3 +1,10 @@
+# v9 (2020-08-30)
+
+## Bugfixes
+
+- Fixed version mismatch issue that caused update dialog to always
+  open.
+
 # v8 (2020-08-30)
 
 ## Features
