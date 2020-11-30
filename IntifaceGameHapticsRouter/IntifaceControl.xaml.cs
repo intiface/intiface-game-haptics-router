@@ -7,10 +7,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
-using Buttplug.Client;
-using Buttplug.Core.Logging;
-using Buttplug.Core.Messages;
-using Buttplug.Server;
+using Buttplug;
 using NLog;
 
 namespace IntifaceGameHapticsRouter
@@ -41,7 +38,6 @@ namespace IntifaceGameHapticsRouter
         public ObservableCollection<CheckedListItem> DevicesList { get; set; } = new ObservableCollection<CheckedListItem>();
 
         private ButtplugClient _client;
-        private DeviceManager _deviceManager;
         private List<ButtplugClientDevice> _devices = new List<ButtplugClientDevice>();
         private Task _connectTask;
         private bool _quitting;
@@ -51,12 +47,7 @@ namespace IntifaceGameHapticsRouter
         public EventHandler ConnectedHandler;
         public EventHandler DisconnectedHandler;
         public EventHandler<string> LogMessageHandler;
-        public bool IsConnected => _client.Connected;
-
-        private XInputHaptics _lastVibration = new XInputHaptics();
-        private XInputHaptics _lastSentVibration = new XInputHaptics();
-        private bool _speedNeedsRecalc = false;
-        private Timer commandTimer;
+        //        public bool IsConnected => _client.Connected;
 
         public IntifaceControl()
         {
@@ -67,22 +58,13 @@ namespace IntifaceGameHapticsRouter
                 SecurityProtocolType.Tls | SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12;
             _connectTask = new Task(async () => await ConnectTask());
             _connectTask.Start();
-            commandTimer = new Timer {Interval = 50, AutoReset = true};
-            //commandTimer.Elapsed += OnVibrationTimer;
         }
 
         public async Task ConnectTask()
         {
             Dispatcher.Invoke(() => { ConnectionStatus.Content = "Connecting"; });
-            IButtplugClientConnector connector;
             //if (_useEmbeddedServer)
             {
-                var embeddedConnector = new ButtplugEmbeddedConnector("GVR Embedded Server", 0, _deviceManager);
-                if (_deviceManager == null)
-                {
-                    _deviceManager = embeddedConnector.Server.DeviceManager;
-                }
-                connector = embeddedConnector;
             }
             //else
             {
@@ -93,18 +75,20 @@ namespace IntifaceGameHapticsRouter
                 //var secureWebsocketClient = new ButtplugClient("GVR - Secure Websocket", secureWebsocketConnector);
             }
 
-            var client = new ButtplugClient("GVR - IPC", connector);
+            var client = new ButtplugClient("GVR - IPC");
             while (!_quitting)
             {
-                try
+                //try
                 {
+                    var connector = new ButtplugEmbeddedConnectorOptions();
                     client.DeviceAdded += OnDeviceAdded;
-                    client.DeviceRemoved += OnDeviceRemoved;
-                    client.Log += OnLogMessage;
+                    //                    client.DeviceRemoved += OnDeviceRemoved;
+                    //client.Log += OnLogMessage;
                     client.ServerDisconnect += OnDisconnect;
-                    await client.ConnectAsync();
-                    await client.RequestLogAsync(ButtplugLogLevel.Debug);
+                    await client.ConnectAsync(connector);
+                    //await client.RequestLogAsync(ButtplugLogLevel.Debug);
                     _client = client;
+                    client.ScanningFinished += OnScanningFinished;
                     await Dispatcher.Invoke(async () =>
                     {
                         ConnectedHandler?.Invoke(this, new EventArgs());
@@ -114,6 +98,7 @@ namespace IntifaceGameHapticsRouter
                     });
                     break;
                 }
+                /*
                 catch (ButtplugClientConnectorException)
                 {
                     Debug.WriteLine("Retrying");
@@ -133,25 +118,31 @@ namespace IntifaceGameHapticsRouter
                         await _client.DisconnectAsync();
                     }
                 }
+                */
             }
+        }
+
+        public void OnScanningFinished(object o, EventArgs e)
+        {
+            Dispatcher.Invoke(new Action(() => _scanningButton.Content = "Start Scanning"));
         }
 
         public async Task Disconnect()
         {
             _quitting = true;
-            await _client.DisconnectAsync();
+            //await _client.DisconnectAsync();
         }
 
         public async Task StartScanning()
         {
-            await _client.StartScanningAsync();
             _scanningButton.Content = "Stop Scanning";
+            await _client.StartScanningAsync();
         }
 
         public async Task StopScanning()
         {
-            await _client.StopScanningAsync();
             _scanningButton.Content = "Start Scanning";
+            await _client.StopScanningAsync();
         }
 
         public async void OnScanningClick(object aObj, EventArgs aArgs)
@@ -160,7 +151,14 @@ namespace IntifaceGameHapticsRouter
             // Dear god this is so jank. How is IsScanning not exposed on the Buttplug Client?
             if (_scanningButton.Content.ToString().Contains("Stop"))
             {
-                await StopScanning();
+                try
+                {
+                    await StopScanning();
+                }
+                catch (ButtplugException e)
+                {
+                    // This will happen if scanning has already stopped. For now, ignore it.
+                }
             }
             else
             {
@@ -177,7 +175,7 @@ namespace IntifaceGameHapticsRouter
             _client = null;
         }
 
-        public void OnDeviceAdded(object aObj, Buttplug.Client.DeviceAddedEventArgs aArgs)
+        public void OnDeviceAdded(object aObj, DeviceAddedEventArgs aArgs)
         {
             Dispatcher.Invoke(() => { DevicesList.Add(new CheckedListItem(aArgs.Device)); });
         }
@@ -197,31 +195,16 @@ namespace IntifaceGameHapticsRouter
                 }
             });
         }
-
-        public void OnLogMessage(object aObj, LogEventArgs aArgs)
-        {
-            try
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    LogMessageHandler?.Invoke(this, aArgs.Message.LogMessage);
-                });
-            }
-            catch (TaskCanceledException)
-            {
-                // noop, we're shutting down.
-            }
-        }
-
+ 
         public async Task Vibrate(double aSpeed)
         {
             foreach (var deviceItem in DevicesList)
             {
-                if (deviceItem.IsChecked && deviceItem.Device.AllowedMessages.ContainsKey(typeof(VibrateCmd)))
+                if (deviceItem.IsChecked && deviceItem.Device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.VibrateCmd))
                 {
                     await deviceItem.Device.SendVibrateCmd(aSpeed);
                 }
-                if (deviceItem.IsChecked && deviceItem.Device.AllowedMessages.ContainsKey(typeof(RotateCmd)))
+                if (deviceItem.IsChecked && deviceItem.Device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.RotateCmd))
                 {
                     await deviceItem.Device.SendRotateCmd(aSpeed, true);
                 }
@@ -232,52 +215,5 @@ namespace IntifaceGameHapticsRouter
         {
             await Vibrate(0);
         }
-
-        /*
-        private async void OnVibrationTimer(object aObj, ElapsedEventArgs e)
-        {
-            if (_lastVibration == _lastSentVibration && !_speedNeedsRecalc)
-            {
-                return;
-            }
-
-            await Dispatcher.Invoke(async () =>
-            {
-                foreach (var device in _devices)
-                {
-                    if (device.AllowedMessages.ContainsKey(typeof(VibrateCmd)))
-                    {
-                        try
-                        {
-                            var attrs = device.AllowedMessages[typeof(VibrateCmd)];
-                            var vibeCount = attrs.FeatureCount ?? 0;
-                            List<VibrateCmd.VibrateSubcommand> vibratorSettings = new List<VibrateCmd.VibrateSubcommand>();
-
-                            var averageVibeSpeed = (_lastVibration.LeftMotorSpeed + _lastVibration.RightMotorSpeed) / (2.0 * 65535.0);
-
-                            // Calculate the vibe speed by first adding the multiplier to the averaged speed 
-                            // Then check if it's above the baseline, if not default to the baseline
-                            // If it is then make sure we don't go above 1.0 speed or things start breaking
-                            //var vibeSpeed = Math.Min(Math.Max(averageVibeSpeed * _vibrationMultiplier, _vibrationBaseline), 1.0);
-                            var vibeSpeed = 0;
-                            for (var i = 0; i < vibeCount; i++)
-                            {
-                                vibratorSettings.Add(new VibrateCmd.VibrateSubcommand((uint)i, vibeSpeed));
-                            }
-
-                            //await _bpServer.SendMessage(new VibrateCmd(device.Index, vibratorSettings));
-                        }
-                        catch (Exception ex)
-                        {
-                            //_log.Error(ex);
-                        }
-                    }
-                }
-            });
-
-            _speedNeedsRecalc = false;
-            _lastSentVibration = _lastVibration;
-        }
-        */
     }
 }
