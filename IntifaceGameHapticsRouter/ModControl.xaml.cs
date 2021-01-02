@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading;
 using EasyHook;
 using NLog;
 using SharpMonoInjector;
@@ -38,6 +39,8 @@ namespace IntifaceGameHapticsRouter
                 var f = System.IO.Path.GetFileNameWithoutExtension(FileName);
                 return $"{f} ({Id}) ({(CanUseMono ? $"Mono/{FrameworkVersion}" : "")}{(CanUseXInput && CanUseMono ? " | " : "")}{(CanUseXInput ? "XInput" : "")})";
             }
+
+            public bool IsLive => Process.GetProcessById(Id) != null;
         }
 
         private class ProcessInfoList : ObservableCollection<ProcessInfo>
@@ -46,6 +49,10 @@ namespace IntifaceGameHapticsRouter
 
         public bool Attached
         {
+            get
+            {
+                return _attached;
+            }
             set
             {
                 _attached = value;
@@ -67,11 +74,13 @@ namespace IntifaceGameHapticsRouter
 
         public event EventHandler<EventArgs> ProcessDetached;
 
-        private bool _attached;
+        private bool _attached = false;
         private readonly Logger _log;
         private Task _enumProcessTask;
         private UnityVRMod _unityMod;
         private XInputMod _xinputMod;
+        private CancellationTokenSource _scanningTokenSource = null;
+        private CancellationToken _scanningToken;
 
         public ModControl()
         {
@@ -85,10 +94,13 @@ namespace IntifaceGameHapticsRouter
 
         private void RunEnumProcessUpdate()
         {
-            if (_enumProcessTask != null)
+            if (_scanningTokenSource != null)
             {
-                return;
+                _scanningTokenSource.Cancel();
+                _enumProcessTask.Wait();
             }
+            _scanningTokenSource = new CancellationTokenSource();
+            _scanningToken = _scanningTokenSource.Token;
             _enumProcessTask = new Task(() => EnumProcesses());
             _enumProcessTask.Start();
         }
@@ -99,8 +111,13 @@ namespace IntifaceGameHapticsRouter
             Dispatcher.Invoke(() => { ProcessError = "Scanning Processes..."; });
             var cp = Process.GetCurrentProcess().Id;
             const ProcessAccessRights flags = ProcessAccessRights.PROCESS_QUERY_INFORMATION | ProcessAccessRights.PROCESS_VM_READ;
-            foreach (var currentProc in from proc in Process.GetProcesses() orderby proc.ProcessName select proc)
+            var procList = from proc in Process.GetProcesses() orderby proc.ProcessName select proc;
+            Parallel.ForEach(procList, (currentProc) =>
             {
+                if (_scanningToken.IsCancellationRequested)
+                {
+                    return;
+                }
                 var handle = IntPtr.Zero;
 
                 try
@@ -108,7 +125,7 @@ namespace IntifaceGameHapticsRouter
                     // This can sometimes happen between calling GetProcesses and getting here. Save ourselves the throw.
                     if (currentProc.HasExited || currentProc.Id == cp)
                     {
-                        continue;
+                        return;
                     }
 
                     // This is usually what throws, so do it before we invoke via dispatcher.
@@ -116,7 +133,7 @@ namespace IntifaceGameHapticsRouter
 
                     if ((handle = Native.OpenProcess(flags, false, currentProc.Id)) == IntPtr.Zero)
                     {
-                        continue;
+                        return;
                     }
 
                     var procInfo = new ProcessInfo
@@ -124,12 +141,12 @@ namespace IntifaceGameHapticsRouter
                         FileName = currentProc.ProcessName,
                         Id = currentProc.Id,
                     };
-                    
+
                     if (XInputMod.CanUseMod(handle))
                     {
                         procInfo.Owner = owner;
                     }
-                    
+
                     if (UnityVRMod.CanUseMod(handle, currentProc.MainModule.FileName, out var module, out var frameworkVersion))
                     {
                         procInfo.MonoModule = module;
@@ -165,8 +182,9 @@ namespace IntifaceGameHapticsRouter
                         Native.CloseHandle(handle);
                     }
                 }
-            }
+            });
             Dispatcher.Invoke(() => { ProcessError = "Select Process to Inject"; });
+            _scanningTokenSource = null;
             _enumProcessTask = null;
         }
 
@@ -182,36 +200,54 @@ namespace IntifaceGameHapticsRouter
 
         private void AttachButton_Click(object aObj, System.Windows.RoutedEventArgs aEvent)
         {
-            AttachButton.IsEnabled = false;
-            RefreshButton.IsEnabled = false;
-            if (!_attached)
+            if (!Attached)
             {
-                var process = ProcessListBox.SelectedItems.Cast<ProcessInfo>().ToList();
+                var process = ProcessListBox.SelectedItems.Cast<ProcessInfo>().ToList()[0];
+                if (!process.IsLive)
+                {
+                    return;
+                }
+
+                AttachButton.IsEnabled = false;
+                RefreshButton.IsEnabled = false;
+                ProcessListBox.IsEnabled = false;
+
                 var attached = false;
-                if (process[0].CanUseMono)
+                try
                 {
-                    _unityMod = new UnityVRMod();
-                    _unityMod.MessageReceivedHandler += OnMessageReceived;
-                    _unityMod.Inject(process[0].Id, process[0].FrameworkVersion, process[0].MonoModule);
-                    attached = true;
-                }
+                    if (process.CanUseMono)
+                    {
+                        _unityMod = new UnityVRMod();
+                        _unityMod.MessageReceivedHandler += OnMessageReceived;
+                        _unityMod.Inject(process.Id, process.FrameworkVersion, process.MonoModule);
+                        attached = true;
+                    }
 
-                if (process[0].CanUseXInput)
-                {
-                    _xinputMod = new XInputMod();
-                    _xinputMod.Attach(process[0].Id);
-                    _xinputMod.MessageReceivedHandler += OnMessageReceived;
-                    attached = true;
-                }
+                    if (process.CanUseXInput)
+                    {
+                        _xinputMod = new XInputMod();
+                        _xinputMod.Attach(process.Id);
+                        _xinputMod.MessageReceivedHandler += OnMessageReceived;
+                        attached = true;
+                    }
 
-                if (attached)
+                    if (attached)
+                    {
+                        Attached = true;
+                        ProcessAttached?.Invoke(this, null);
+                    }
+                } 
+                catch
                 {
-                    ProcessAttached?.Invoke(this, null);
+                    Attached = false;
+                }
+                finally
+                {
+                    AttachButton.IsEnabled = true;
                 }
             }
             else
             {
-                ProcessDetached?.Invoke(this, null);
                 Detach();
             }
         }
@@ -223,6 +259,7 @@ namespace IntifaceGameHapticsRouter
 
         private void Detach()
         {
+            _xinputMod.Detach();
             Attached = false;
         }
     }

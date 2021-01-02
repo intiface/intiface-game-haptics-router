@@ -102,7 +102,7 @@ namespace IntifaceGameHapticsRouter
             }
         }
 
-        private void Detach()
+        public void Detach()
         {
             GHRXInputModInterface.GHRXInputModInterface.Detach();
             _channelName = null;
