@@ -10,6 +10,7 @@ using Microsoft.Win32;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
+using Buttplug;
 
 namespace IntifaceGameHapticsRouter
 {
@@ -50,7 +51,7 @@ namespace IntifaceGameHapticsRouter
     /// </summary>
     public partial class LogControl : UserControl
     {
-        private readonly LogList _logs;
+        private static LogList _logs;
         private readonly IntifaceNLogTarget _logTarget;
         private LoggingRule _outgoingLoggingRule;
 
@@ -86,6 +87,8 @@ namespace IntifaceGameHapticsRouter
 
             //LogLevelComboBox.SelectionChanged += LogLevelSelectionChangedHandler;
             LogListBox.ItemsSource = _logs;
+            ButtplugFFILog.StartLogHandler(ButtplugLogLevel.Info, false);
+            Buttplug.ButtplugFFILog.LogMessage += (obj, msg) => _logs.Add(msg.Trim());
         }
 
         public void AddLogMessage(string aMsg)
