@@ -81,6 +81,7 @@ namespace IntifaceGameHapticsRouter
                 //try
                 {
                     var connector = new ButtplugEmbeddedConnectorOptions();
+                    //var connector = new ButtplugWebsocketConnectorOptions(new Uri("ws://localhost:12345"));
                     client.DeviceAdded += OnDeviceAdded;
                     //                    client.DeviceRemoved += OnDeviceRemoved;
                     //client.Log += OnLogMessage;
@@ -93,7 +94,7 @@ namespace IntifaceGameHapticsRouter
                     {
                         ConnectedHandler?.Invoke(this, new EventArgs());
                         ConnectionStatus.Content = "Connected to Intiface (Embedded)";
-                        await StartScanning();
+                        // await StartScanning();
                         _scanningButton.Visibility = Visibility.Visible;
                     });
                     break;
@@ -133,19 +134,17 @@ namespace IntifaceGameHapticsRouter
             //await _client.DisconnectAsync();
         }
 
-        public async Task StartScanning()
+        public Task StartScanning()
         {
-            _scanningButton.Content = "Stop Scanning";
-            await _client.StartScanningAsync();
+            return _client.StartScanningAsync();
         }
 
-        public async Task StopScanning()
+        public Task StopScanning()
         {
-            _scanningButton.Content = "Start Scanning";
-            await _client.StopScanningAsync();
+            return _client.StopScanningAsync();
         }
 
-        public async void OnScanningClick(object aObj, EventArgs aArgs)
+        public void OnScanningClick(object aObj, EventArgs aArgs)
         {
             _scanningButton.IsEnabled = false;
             // Dear god this is so jank. How is IsScanning not exposed on the Buttplug Client?
@@ -153,7 +152,8 @@ namespace IntifaceGameHapticsRouter
             {
                 try
                 {
-                    await StopScanning();
+                    _scanningButton.Content = "Start Scanning";
+                    Task.Run(async () => await StopScanning());
                 }
                 catch (ButtplugException e)
                 {
@@ -162,7 +162,8 @@ namespace IntifaceGameHapticsRouter
             }
             else
             {
-                await StartScanning();
+                _scanningButton.Content = "Stop Scanning";
+                Task.Run(async () => await StartScanning());
             }
             _scanningButton.IsEnabled = true;
         }
@@ -177,7 +178,16 @@ namespace IntifaceGameHapticsRouter
 
         public void OnDeviceAdded(object aObj, DeviceAddedEventArgs aArgs)
         {
-            Dispatcher.Invoke(() => { DevicesList.Add(new CheckedListItem(aArgs.Device)); });
+            Dispatcher.Invoke(() => {
+                try
+                {
+                    DevicesList.Add(new CheckedListItem(aArgs.Device));
+                }
+                catch (Exception ex)
+                {
+                    // Ignore already added devices
+                }
+            });
         }
 
         public void OnDeviceRemoved(object aObj, DeviceRemovedEventArgs aArgs)
