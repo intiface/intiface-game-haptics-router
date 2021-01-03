@@ -139,7 +139,7 @@ namespace IntifaceGameHapticsRouter
                 vrTimer.Start();
                 if (!isEnabled)
                 {
-                    await Dispatcher.Invoke(async () => { await _intifaceTab.Vibrate(1); });
+                    await Dispatcher.Invoke(async () => { await _intifaceTab.Vibrate(Math.Min(Math.Max(_multiplier, _baseline), 1.0)); });
                 }
             }
             else if (aMsg.XInputHaptics != null)
