@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -59,8 +59,8 @@
     <ApplicationIcon>intiface-ghr-logo-1.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Buttplug, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.1.0.4\lib\netstandard2.0\Buttplug.dll</HintPath>
+    <Reference Include="Buttplug, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Buttplug.1.0.5\lib\netstandard2.0\Buttplug.dll</HintPath>
     </Reference>
     <Reference Include="EasyHook, Version=2.7.7097.0, Culture=neutral, PublicKeyToken=4b580fca19d0b0c5, processorArchitecture=MSIL">
       <HintPath>..\packages\EasyHook.2.7.7097\lib\net40\EasyHook.dll</HintPath>
@@ -269,8 +269,8 @@ copy $(SolutionDir)packages\EasyHook.2.7.7097\content\net40\*.* $(TargetDir)</Po
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\MaterialDesignThemes.4.0.0-ci2312\build\MaterialDesignThemes.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MaterialDesignThemes.4.0.0-ci2312\build\MaterialDesignThemes.targets'))" />
-    <Error Condition="!Exists('..\packages\ButtplugRustFFI.1.0.2\build\ButtplugRustFFI.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ButtplugRustFFI.1.0.2\build\ButtplugRustFFI.targets'))" />
+    <Error Condition="!Exists('..\packages\ButtplugRustFFI.1.0.3\build\ButtplugRustFFI.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ButtplugRustFFI.1.0.3\build\ButtplugRustFFI.targets'))" />
   </Target>
   <Import Project="..\packages\MaterialDesignThemes.4.0.0-ci2312\build\MaterialDesignThemes.targets" Condition="Exists('..\packages\MaterialDesignThemes.4.0.0-ci2312\build\MaterialDesignThemes.targets')" />
-  <Import Project="..\packages\ButtplugRustFFI.1.0.2\build\ButtplugRustFFI.targets" Condition="Exists('..\packages\ButtplugRustFFI.1.0.2\build\ButtplugRustFFI.targets')" />
+  <Import Project="..\packages\ButtplugRustFFI.1.0.3\build\ButtplugRustFFI.targets" Condition="Exists('..\packages\ButtplugRustFFI.1.0.3\build\ButtplugRustFFI.targets')" />
 </Project>
