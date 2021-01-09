@@ -58,7 +58,7 @@ namespace IntifaceGameHapticsRouter
                 _attached = value;
                 ProcessListBox.IsEnabled = !value;
                 RefreshButton.IsEnabled = !value;
-                AttachButton.IsEnabled = true;
+                AttachButton.IsEnabled = _unityMod == null;
                 AttachButton.Content = value ? "Detach From Process" : "Attach To Process";
             }
         }
@@ -71,7 +71,6 @@ namespace IntifaceGameHapticsRouter
         private ProcessInfoList _processList = new ProcessInfoList();
 
         public event EventHandler<EventArgs> ProcessAttached;
-
         public event EventHandler<EventArgs> ProcessDetached;
 
         private bool _attached = false;
@@ -243,16 +242,12 @@ namespace IntifaceGameHapticsRouter
                     {
                         Attached = true;
                         ProcessAttached?.Invoke(this, null);
-                        Dispatcher.Invoke(() => { ProcessStatus = $"Attached to process {process.FileName} ({process.Id})"; });
+                        ProcessStatus = $"Attached to {process.FileName} ({process.Id}) {(_unityMod != null ? " - Restart GHR to detach" : "")}";
                     }
                 } 
                 catch
                 {
                     Attached = false;
-                }
-                finally
-                {
-                    AttachButton.IsEnabled = true;
                 }
             }
             else
@@ -269,6 +264,7 @@ namespace IntifaceGameHapticsRouter
         private void Detach()
         {
             _xinputMod.Detach();
+            _xinputMod = null;
             Attached = false;
         }
     }
