@@ -13,7 +13,7 @@
         </Grid.RowDefinitions>
 
         <Button Grid.Row="0" Name="AttachButton" IsEnabled="false" Content="Attach To Process" Margin="10,5,0,0" HorizontalAlignment="Left" Click="AttachButton_Click" />
-        <Label Grid.Row="0" Name="ErrorLabel" Content="Select Process To Inject"  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Label Grid.Row="0" Name="StatusLabel" Content="Select Process To Inject"  HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <Button Grid.Row="0" Name="RefreshButton" Content="Refresh List" Margin="0,5,10,0" HorizontalAlignment="Right" Click="RefreshButton_Click" />
         <ListBox Grid.Row="1" Name="ProcessListBox" Margin="10,10,10,10" />
     </Grid>

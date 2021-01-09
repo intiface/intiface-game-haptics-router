@@ -63,9 +63,9 @@ namespace IntifaceGameHapticsRouter
             }
         }
 
-        public string ProcessError
+        public string ProcessStatus
         {
-            set { ErrorLabel.Content = value; }
+            set { StatusLabel.Content = value; }
         }
 
         private ProcessInfoList _processList = new ProcessInfoList();
@@ -108,7 +108,7 @@ namespace IntifaceGameHapticsRouter
         private void EnumProcesses()
         {
             Dispatcher.Invoke(() => { _processList.Clear(); });
-            Dispatcher.Invoke(() => { ProcessError = "Scanning Processes..."; });
+            Dispatcher.Invoke(() => { ProcessStatus = "Scanning Processes..."; });
             var cp = Process.GetCurrentProcess().Id;
             const ProcessAccessRights flags = ProcessAccessRights.PROCESS_QUERY_INFORMATION | ProcessAccessRights.PROCESS_VM_READ;
             var procList = from proc in Process.GetProcesses() orderby proc.ProcessName select proc;
@@ -183,7 +183,10 @@ namespace IntifaceGameHapticsRouter
                     }
                 }
             });
-            Dispatcher.Invoke(() => { ProcessError = "Select Process to Inject"; });
+            if (!_attached)
+            {
+                Dispatcher.Invoke(() => { ProcessStatus = "Select Process to Inject"; });
+            }
             _scanningTokenSource = null;
             _enumProcessTask = null;
         }
@@ -202,6 +205,11 @@ namespace IntifaceGameHapticsRouter
         {
             if (!Attached)
             {
+                if (_scanningTokenSource != null && _scanningToken.CanBeCanceled)
+                {
+                    _scanningTokenSource.Cancel();
+                }
+
                 var process = ProcessListBox.SelectedItems.Cast<ProcessInfo>().ToList()[0];
                 if (!process.IsLive)
                 {
@@ -235,6 +243,7 @@ namespace IntifaceGameHapticsRouter
                     {
                         Attached = true;
                         ProcessAttached?.Invoke(this, null);
+                        Dispatcher.Invoke(() => { ProcessStatus = $"Attached to process {process.FileName} ({process.Id})"; });
                     }
                 } 
                 catch

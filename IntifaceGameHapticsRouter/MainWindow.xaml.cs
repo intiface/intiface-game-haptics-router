@@ -28,7 +28,7 @@ namespace IntifaceGameHapticsRouter
             InitializeComponent();
             vrTimer.Interval = 75;
             vrTimer.Elapsed += OnVRTimer;
-            xinputTimer.Interval = 50;
+            xinputTimer.Interval = IntifaceGameHapticsRouterProperties.Default.BluetoothTiming;
             xinputTimer.Elapsed += OnXInputTimer;
             if (Application.Current == null)
             {

@@ -41,8 +41,6 @@ namespace IntifaceGameHapticsRouter
         private List<ButtplugClientDevice> _devices = new List<ButtplugClientDevice>();
         private Task _connectTask;
         private bool _quitting;
-        private bool _useEmbeddedServer = true;
-        private Logger _log;
 
         public EventHandler ConnectedHandler;
         public EventHandler DisconnectedHandler;
@@ -52,74 +50,130 @@ namespace IntifaceGameHapticsRouter
         public IntifaceControl()
         {
             InitializeComponent();
-            _log = LogManager.GetCurrentClassLogger();
             DeviceListBox.ItemsSource = DevicesList;
             ServicePointManager.SecurityProtocol =
                 SecurityProtocolType.Tls | SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12;
-            _connectTask = new Task(async () => await ConnectTask());
+            _autoConnect.IsChecked = IntifaceGameHapticsRouterProperties.Default.ConnectOnStartup;
+            _remoteAddress.Text = IntifaceGameHapticsRouterProperties.Default.WebsocketAddress;
+            _remoteAddress.TextChanged += (object o, TextChangedEventArgs e) =>
+            {
+                IntifaceGameHapticsRouterProperties.Default.WebsocketAddress = _remoteAddress.Text;
+                IntifaceGameHapticsRouterProperties.Default.Save();
+            };
+            _radioEmbedded.IsChecked = IntifaceGameHapticsRouterProperties.Default.UseEmbedded;
+            _radioRemote.IsChecked = IntifaceGameHapticsRouterProperties.Default.UseRemote;
+            OnRadioChange(null, null);
+            if (_autoConnect.IsChecked == true)
+            {
+                var addressArg = _radioEmbedded.IsChecked == false ? _remoteAddress.Text : null;
+                OnConnectClick(null, null);
+            }
+            _connectStatus.Text = "Not connected";
+            _scanningButton.IsEnabled = false;
+        }
+
+        public void OnAutoConnectChange(object o, EventArgs e)
+        {
+            IntifaceGameHapticsRouterProperties.Default.ConnectOnStartup = _autoConnect.IsChecked == true;
+            IntifaceGameHapticsRouterProperties.Default.Save();
+        }
+
+        public void OnRadioChange(object o, EventArgs e)
+        {
+            if (_radioEmbedded == null || _radioRemote == null)
+            {
+                return;
+            }
+            IntifaceGameHapticsRouterProperties.Default.UseEmbedded = _radioEmbedded.IsChecked == true;
+            IntifaceGameHapticsRouterProperties.Default.UseRemote = _radioRemote.IsChecked == true;
+            IntifaceGameHapticsRouterProperties.Default.Save();
+            EmbeddedConnectionOptions.Visibility = _radioEmbedded.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            RemoteConnectionOptions.Visibility = _radioRemote.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public void OnConnectClick(object o, EventArgs e)
+        {
+            _connectButton.IsEnabled = false;
+            _radioEmbedded.IsEnabled = false;
+            _radioRemote.IsEnabled = false;
+            var address = _radioEmbedded.IsChecked == false ? _remoteAddress.Text : null;
+            _connectTask = new Task(async () => await ConnectTask(address));
             _connectTask.Start();
         }
 
-        public async Task ConnectTask()
+        public async Task ConnectTask(string aAddress)
         {
-            Dispatcher.Invoke(() => { ConnectionStatus.Content = "Connecting"; });
-            //if (_useEmbeddedServer)
+            var client = new ButtplugClient("Game Haptics Router");
+            client.DeviceAdded += OnDeviceAdded;
+            client.DeviceRemoved += OnDeviceRemoved;
+            client.ServerDisconnect += OnDisconnect;
+            client.ScanningFinished += OnScanningFinished;
+            try
             {
-            }
-            //else
-            {
-                //connector = new ButtplugWebsocketConnector(new Uri("ws://localhost:12345/buttplug"));
-                //var secureWebsocketConnector = new ButtplugWebsocketConnector();
-                //var ipcConnector = new ButtplugClientIPCConnector("ButtplugPort");
-                //var insecureWebsocketClient = new ButtplugClient("GVR - Insecure Websocket", insecureWebsocketConnector);
-                //var secureWebsocketClient = new ButtplugClient("GVR - Secure Websocket", secureWebsocketConnector);
-            }
-
-            var client = new ButtplugClient("GVR - IPC");
-            while (!_quitting)
-            {
-                //try
+                if (aAddress == null)
                 {
-                    var connector = new ButtplugEmbeddedConnectorOptions();
-                    //var connector = new ButtplugWebsocketConnectorOptions(new Uri("ws://localhost:12345"));
-                    client.DeviceAdded += OnDeviceAdded;
-                    //                    client.DeviceRemoved += OnDeviceRemoved;
-                    //client.Log += OnLogMessage;
-                    client.ServerDisconnect += OnDisconnect;
+                    await client.ConnectAsync(new ButtplugEmbeddedConnectorOptions());
+                }
+                else
+                {
+                    var connector = new ButtplugWebsocketConnectorOptions(new Uri(aAddress));
                     await client.ConnectAsync(connector);
-                    //await client.RequestLogAsync(ButtplugLogLevel.Debug);
-                    _client = client;
-                    client.ScanningFinished += OnScanningFinished;
-                    await Dispatcher.Invoke(async () =>
+                }
+
+                _client = client;
+
+                await Dispatcher.Invoke(async () =>
+                {
+                    ConnectedHandler?.Invoke(this, new EventArgs()); 
+                    _connectStatus.Text = $"Connected{(aAddress == null ? ", restart GHR to disconnect." : " to Remote Buttplug Server")}";
+                    OnScanningClick(null, null);
+                    _scanningButton.IsEnabled = true;
+                    _connectButton.Visibility = Visibility.Collapsed;
+                    if (aAddress != null)
                     {
-                        ConnectedHandler?.Invoke(this, new EventArgs());
-                        ConnectionStatus.Content = "Connected to Intiface (Embedded)";
-                        // await StartScanning();
-                        _scanningButton.Visibility = Visibility.Visible;
+                        _disconnectButton.Visibility = Visibility.Visible;
+                    }
+                });
+            }
+            catch (ButtplugConnectorException ex)
+            {
+                Debug.WriteLine("Connection failed.");
+                // If the exception was thrown after connect, make sure we disconnect.
+                if (_client != null && _client.Connected)
+                {
+                    await _client.DisconnectAsync();
+                    _client = null;
+                }
+                Dispatcher.Invoke(() =>
+                {
+                    _connectStatus.Text = $"Connection failed, please try again.";
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Did something else fail? {ex})");
+                // If the exception was thrown after connect, make sure we disconnect.
+                if (_client != null && _client.Connected)
+                {
+                    await _client.DisconnectAsync();
+                    _client = null;
+                }
+                Dispatcher.Invoke(() =>
+                {
+                    _connectStatus.Text = $"Connection failed, please try again.";
+                });
+            }
+            finally
+            {
+                if (_client == null)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        _connectButton.IsEnabled = true;
+                        _radioEmbedded.IsEnabled = true;
+                        _radioRemote.IsEnabled = true;
                     });
-                    break;
                 }
-                /*
-                catch (ButtplugClientConnectorException)
-                {
-                    Debug.WriteLine("Retrying");
-                    // Just keep trying to connect.
-                    // If the exception was thrown after connect, make sure we disconnect.
-                    if (_client != null && _client.Connected)
-                    {
-                        await _client.DisconnectAsync();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Did something else fail? {ex})");
-                    // If the exception was thrown after connect, make sure we disconnect.
-                    if (_client != null && _client.Connected)
-                    {
-                        await _client.DisconnectAsync();
-                    }
-                }
-                */
             }
         }
 
@@ -128,10 +182,18 @@ namespace IntifaceGameHapticsRouter
             Dispatcher.Invoke(new Action(() => _scanningButton.Content = "Start Scanning"));
         }
 
+        public void OnDisconnectClick(object o, EventArgs e)
+        {
+            _disconnectButton.IsEnabled = false;
+            new Task(async () => await Disconnect()).Start();
+        }
+
         public async Task Disconnect()
         {
-            _quitting = true;
-            //await _client.DisconnectAsync();
+            await _client.DisconnectAsync();
+            Dispatcher.Invoke(() => { 
+                OnDisconnect(null, null);
+            });
         }
 
         public Task StartScanning()
@@ -170,15 +232,22 @@ namespace IntifaceGameHapticsRouter
 
         public void OnDisconnect(object aObj, EventArgs aArgs)
         {
-            _connectTask = new Task(async () => await ConnectTask());
-            _connectTask.Start();
-            _devices.Clear();
-            _client = null;
+            Dispatcher.Invoke(() =>
+            {
+                _connectButton.IsEnabled = true;
+                _connectButton.Visibility = Visibility.Visible;
+                _disconnectButton.Visibility = Visibility.Collapsed;
+                _connectStatus.Text = "Disconnected";
+                DevicesList.Clear();
+                _client.Dispose();
+                _client = null;
+            });
         }
 
         public void OnDeviceAdded(object aObj, DeviceAddedEventArgs aArgs)
         {
-            Dispatcher.Invoke(() => {
+            Dispatcher.Invoke(() =>
+            {
                 try
                 {
                     DevicesList.Add(new CheckedListItem(aArgs.Device));
@@ -205,7 +274,7 @@ namespace IntifaceGameHapticsRouter
                 }
             });
         }
- 
+
         public async Task Vibrate(double aSpeed)
         {
             foreach (var deviceItem in DevicesList)
@@ -224,6 +293,16 @@ namespace IntifaceGameHapticsRouter
         public async Task StopVibration()
         {
             await Vibrate(0);
+        }
+
+        private void DisposeClient()
+        {
+            if (_client == null)
+            {
+                return;
+            }
+            _client.Dispose();
+            _client = null;
         }
     }
 }

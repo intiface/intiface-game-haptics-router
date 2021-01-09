@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -136,6 +136,11 @@
       <DependentUpon>AboutControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="GHRProtocol.cs" />
+    <Compile Include="IntifaceGameHapticsRouterProperties.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>IntifaceGameHapticsRouterProperties.settings</DependentUpon>
+    </Compile>
     <Compile Include="LogControl.xaml.cs">
       <DependentUpon>LogControl.xaml</DependentUpon>
     </Compile>
@@ -201,6 +206,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="IntifaceGameHapticsRouterProperties.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>IntifaceGameHapticsRouterProperties.Designer.cs</LastGenOutput>
+    </None>
     <None Include="packages.config">
       <Generator>MSBuild:Compile</Generator>
     </None>

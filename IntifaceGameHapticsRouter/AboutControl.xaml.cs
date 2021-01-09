@@ -23,6 +23,7 @@ namespace IntifaceGameHapticsRouter
 
         public async Task CheckForUpdate()
         {
+            /*
             try
             {
                 var client = new Octokit.GitHubClient(new ProductHeaderValue($"IntifaceGameHapticsRouter{_currentVersion}"));
@@ -53,6 +54,7 @@ namespace IntifaceGameHapticsRouter
                 var log = LogManager.GetCurrentClassLogger();
                 log.Error($"Cannot run update check: {ex.Message}");
             }
+            */
         }
 
         private void TryUri(string aUri)

@@ -36,6 +36,12 @@ namespace IntifaceGameHapticsRouter
         public VisualizerControl()
         {
             InitializeComponent();
+            multiplierSlider.Value = IntifaceGameHapticsRouterProperties.Default.VibrationMultiplier;
+            multiplierSlider.ValueChanged += (object o, RoutedPropertyChangedEventArgs<double> e) =>
+            {
+                IntifaceGameHapticsRouterProperties.Default.VibrationMultiplier = Multiplier;
+                IntifaceGameHapticsRouterProperties.Default.Save();
+            };
             LowPowerValues = new ChartValues<double>();
             HighPowerValues = new ChartValues<double>();
             for (var i = 0; i < 200; ++i)
