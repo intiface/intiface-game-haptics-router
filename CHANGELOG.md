@@ -1,3 +1,20 @@
+# v10 (2021-01-08)
+
+## Features
+
+- Move to Buttplug v1
+  - More toy support
+  - Lovense Dongle support!
+- Add process detaching (XInput only)
+- Add ability to connect to Intiface Desktop
+- Add property saving/storage
+
+## Bugfixes
+
+- Process list generation now uses all available processors
+- Messages added in cases where restarts are required
+- Vibration Multiplier now applies to VR attachments
+
 # v9 (2020-08-30)
 
 ## Bugfixes
