@@ -8,6 +8,7 @@
 - Add process detaching (XInput only)
 - Add ability to connect to Intiface Desktop
 - Add property saving/storage
+- Add packet gap timing setting to reduce toy lag issues
 
 ## Bugfixes
 
