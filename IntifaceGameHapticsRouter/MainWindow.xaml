@@ -46,7 +46,7 @@
                     <local:ModControl x:Name="_modTab"></local:ModControl>
                 </Grid>
             </TabItem>
-            <TabItem Header="Visualizer" Padding="10, 3, 10, 3">
+            <TabItem Header="Visualizer/Settings" Padding="10, 3, 10, 3">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>

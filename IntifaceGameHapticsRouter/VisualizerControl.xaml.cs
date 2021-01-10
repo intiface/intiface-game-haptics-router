@@ -5,6 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using LiveCharts;
 using LiveCharts.Wpf;
+using System.Text.RegularExpressions;
+using System.Windows.Input;
 
 namespace IntifaceGameHapticsRouter
 {
@@ -28,6 +30,7 @@ namespace IntifaceGameHapticsRouter
         public SeriesCollection HighPowerSeriesCollection { get; set; }
         public event EventHandler<double> MultiplierChanged;
         public event EventHandler<double> BaselineChanged;
+        public event EventHandler<int> PacketGapChanged;
         public event EventHandler<bool> PassthruChanged;
 
         public double Multiplier => multiplierSlider.Value;
@@ -36,6 +39,10 @@ namespace IntifaceGameHapticsRouter
         public VisualizerControl()
         {
             InitializeComponent();
+
+            packetGapSlider.Value = IntifaceGameHapticsRouterProperties.Default.PacketTimingGapInMS;
+            packetGapSlider.ValueChanged += packetGapSlider_ValueChanged;
+
             multiplierSlider.Value = IntifaceGameHapticsRouterProperties.Default.VibrationMultiplier;
             multiplierSlider.ValueChanged += (object o, RoutedPropertyChangedEventArgs<double> e) =>
             {
@@ -136,6 +143,21 @@ namespace IntifaceGameHapticsRouter
         private void MultiplierSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             MultiplierChanged?.Invoke(this, Multiplier);
+        }
+
+        private void packetGapSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            IntifaceGameHapticsRouterProperties.Default.PacketTimingGapInMS = (int)packetGapSlider.Value;
+            IntifaceGameHapticsRouterProperties.Default.Save();
+            PacketGapChanged?.Invoke(this, IntifaceGameHapticsRouterProperties.Default.PacketTimingGapInMS);
+        }
+
+        private void ResetSettings_Click(object sender, RoutedEventArgs e)
+        {
+            IntifaceGameHapticsRouterProperties.Default.Reset();
+            IntifaceGameHapticsRouterProperties.Default.Save();
+            MultiplierChanged?.Invoke(this, IntifaceGameHapticsRouterProperties.Default.VibrationMultiplier);
+            PacketGapChanged?.Invoke(this, IntifaceGameHapticsRouterProperties.Default.PacketTimingGapInMS);
         }
     }
 }

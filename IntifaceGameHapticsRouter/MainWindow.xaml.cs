@@ -26,10 +26,10 @@ namespace IntifaceGameHapticsRouter
         public MainWindow()
         {
             InitializeComponent();
-            vrTimer.Interval = 75;
             vrTimer.Elapsed += OnVRTimer;
-            xinputTimer.Interval = IntifaceGameHapticsRouterProperties.Default.BluetoothTiming;
             xinputTimer.Elapsed += OnXInputTimer;
+            vrTimer.Interval = IntifaceGameHapticsRouterProperties.Default.PacketTimingGapInMS;
+            xinputTimer.Interval = IntifaceGameHapticsRouterProperties.Default.PacketTimingGapInMS;
             if (Application.Current == null)
             {
                 return;
@@ -52,6 +52,7 @@ namespace IntifaceGameHapticsRouter
             _modTab.ProcessDetached += OnProcessDetached;
             _graphTab.MultiplierChanged += OnMultiplierChanged;
             _graphTab.BaselineChanged += OnBaselineChanged;
+            _graphTab.PacketGapChanged += OnPacketTimingChanged;
             _multiplier = _graphTab.Multiplier;
             _baseline = _graphTab.Baseline;
             //_graphTab.PassthruChanged += PassthruChanged;
@@ -83,6 +84,12 @@ namespace IntifaceGameHapticsRouter
             {
                 xinputTimer.Start();
             }
+        }
+
+        protected void OnPacketTimingChanged(object o, int a)
+        {
+            vrTimer.Interval = IntifaceGameHapticsRouterProperties.Default.PacketTimingGapInMS;
+            xinputTimer.Interval = IntifaceGameHapticsRouterProperties.Default.PacketTimingGapInMS;
         }
 
         protected void OnLogMessage(object aObj, string aMsg)

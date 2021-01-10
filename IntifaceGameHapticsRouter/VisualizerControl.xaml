@@ -19,6 +19,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <GroupBox Header="Vibration Multiplier" Grid.Row="0">
@@ -31,7 +32,7 @@
                     <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding ElementName=multiplierSlider, Path=Value, StringFormat='x\{0:0.0\}'}" Height="16" Margin="15.333,0,14,0.333" Width="auto"></TextBlock>
                 </Grid>
             </GroupBox>
-            <GroupBox Header="Baseline vibration" Grid.Row="1">
+            <GroupBox Header="Baseline vibration (Not saved between sessions)" Grid.Row="1">
                 <Grid Row="0" RenderTransformOrigin="0.841,0.517">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -41,7 +42,24 @@
                     <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding ElementName=baselineSlider, Path=Value, StringFormat='P0'}" Height="16" Margin="15.333,0,14,0.333" Width="auto"></TextBlock>
                 </Grid>
             </GroupBox>
-            <CheckBox Name="PassthruCheckBox"  Grid.Row="2" Content="Pass Gamepad Rumble To Gamepad" IsChecked="True" HorizontalAlignment="Left" Margin="0,5,0,5" VerticalAlignment="Stretch" Checked="PassthruCheckBox_Changed" Unchecked="PassthruCheckBox_Changed" />
+            <GroupBox Header="Packet Timing Gap (In Milliseconds, 100ms default, make larger if toy is lagging)" Grid.Row="2">
+                <Grid Row="0" RenderTransformOrigin="0.841,0.517">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Slider x:Name="packetGapSlider" Foreground="Black" Grid.Column="0" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" TickPlacement="BottomRight" Minimum="1" Maximum="300" TickFrequency="5" IsSnapToTickEnabled="False" Margin="0,2,0,1.667"/>
+                    <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding ElementName=packetGapSlider, Path=Value, StringFormat='0'}" Height="16" Margin="15.333,0,14,0.333" Width="auto"></TextBlock>
+                </Grid>
+            </GroupBox>
+            <Grid Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <CheckBox Name="PassthruCheckBox" Grid.Column="0" Content="Pass Gamepad Rumble To Gamepad" IsChecked="True" HorizontalAlignment="Left" Margin="0,5,0,5" VerticalAlignment="Stretch" Checked="PassthruCheckBox_Changed" Unchecked="PassthruCheckBox_Changed" />
+                <Button Name="ResetSettings" Grid.Column="1" HorizontalAlignment="Right" Margin="0,2,0,1.667" Click="ResetSettings_Click">Reset Settings</Button>
+            </Grid>
         </Grid>
         <wpf:CartesianChart Name="LowPowerChart" Grid.Row="1" Series="{Binding LowPowerSeriesCollection}" Background="Black" DisableAnimations="True"  Hoverable="False" DataTooltip="{x:Null}">
             <wpf:CartesianChart.AxisY>

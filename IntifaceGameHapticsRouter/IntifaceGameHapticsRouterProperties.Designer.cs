@@ -61,13 +61,13 @@ namespace IntifaceGameHapticsRouter {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("200")]
-        public int BluetoothTiming {
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int PacketTimingGapInMS {
             get {
-                return ((int)(this["BluetoothTiming"]));
+                return ((int)(this["PacketTimingGapInMS"]));
             }
             set {
-                this["BluetoothTiming"] = value;
+                this["PacketTimingGapInMS"] = value;
             }
         }
         
