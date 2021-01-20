@@ -1,8 +1,16 @@
+# v11 (2021-01-19)
+
+## Features
+
+- Move to Buttplug C# v1.0.9
+  - Lovense Ferri support
+  - Lovense dongle support fixes
+
 # v10 (2021-01-08)
 
 ## Features
 
-- Move to Buttplug v1
+- Move to Buttplug C# v1.0.3
   - More toy support
   - Lovense Dongle support!
 - Add process detaching (XInput only)

@@ -59,8 +59,8 @@
     <ApplicationIcon>intiface-ghr-logo-1.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Buttplug, Version=1.0.8.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.1.0.8\lib\netstandard2.0\Buttplug.dll</HintPath>
+    <Reference Include="Buttplug, Version=1.0.9.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Buttplug.1.0.9\lib\netstandard2.0\Buttplug.dll</HintPath>
     </Reference>
     <Reference Include="EasyHook, Version=2.7.7097.0, Culture=neutral, PublicKeyToken=4b580fca19d0b0c5, processorArchitecture=MSIL">
       <HintPath>..\packages\EasyHook.2.7.7097\lib\net40\EasyHook.dll</HintPath>
@@ -279,7 +279,9 @@ copy $(SolutionDir)packages\EasyHook.2.7.7097\content\net40\*.* $(TargetDir)</Po
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\MaterialDesignThemes.4.0.0-ci2312\build\MaterialDesignThemes.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MaterialDesignThemes.4.0.0-ci2312\build\MaterialDesignThemes.targets'))" />
     <Error Condition="!Exists('..\packages\ButtplugRustFFI.1.0.4\build\ButtplugRustFFI.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ButtplugRustFFI.1.0.4\build\ButtplugRustFFI.targets'))" />
+    <Error Condition="!Exists('..\packages\ButtplugRustFFI.1.0.6\build\ButtplugRustFFI.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ButtplugRustFFI.1.0.6\build\ButtplugRustFFI.targets'))" />
   </Target>
   <Import Project="..\packages\MaterialDesignThemes.4.0.0-ci2312\build\MaterialDesignThemes.targets" Condition="Exists('..\packages\MaterialDesignThemes.4.0.0-ci2312\build\MaterialDesignThemes.targets')" />
   <Import Project="..\packages\ButtplugRustFFI.1.0.4\build\ButtplugRustFFI.targets" Condition="Exists('..\packages\ButtplugRustFFI.1.0.4\build\ButtplugRustFFI.targets')" />
+  <Import Project="..\packages\ButtplugRustFFI.1.0.6\build\ButtplugRustFFI.targets" Condition="Exists('..\packages\ButtplugRustFFI.1.0.6\build\ButtplugRustFFI.targets')" />
 </Project>
