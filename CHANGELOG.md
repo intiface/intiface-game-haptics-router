@@ -1,3 +1,11 @@
+# v12 (2021-02-06)
+
+## Features
+
+- Move to Buttplug C# v1.0.12
+  - Lovense Diamo support
+  - Error/bug fixes, fixes for Xinput issues
+
 # v11 (2021-01-19)
 
 ## Features
