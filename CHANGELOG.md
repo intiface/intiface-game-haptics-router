@@ -1,3 +1,9 @@
+# v13 (2021-02-09)
+
+## Bugfixes
+
+- Turn autoupdate checking back on
+
 # v12 (2021-02-06)
 
 ## Features
