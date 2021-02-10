@@ -4,11 +4,9 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
-using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using Buttplug;
-using NLog;
 
 namespace IntifaceGameHapticsRouter
 {
