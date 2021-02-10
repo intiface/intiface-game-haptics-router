@@ -47,6 +47,7 @@ namespace IntifaceGameHapticsRouter
                         }
                     });
                 }
+                UpdateCheckStatus.Text = $"Last Check at {DateTime.Now.ToString()}";
             }
             catch (Exception ex)
             {
