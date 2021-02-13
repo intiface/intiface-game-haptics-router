@@ -1,3 +1,10 @@
+# v14 (2021-02-13)
+
+## Bugfixes
+
+- Update to Buttplug C# v1.0.14
+  - Fixes crash on max power command
+
 # v13 (2021-02-09)
 
 ## Bugfixes
