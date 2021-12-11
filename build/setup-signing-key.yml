@@ -9,16 +9,15 @@ steps:
     inputs:
       targetType: inline
       script: |
-        $kvSecretBytes = [System.Convert]::FromBase64String("$(NPLabsCodeSigningCert)")
+        $kvSecretBytes = [System.Convert]::FromBase64String("$(NPLabsCodeSigningCert202105)")
         $certCollection = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
         $certCollection.Import($kvSecretBytes,$null,[System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
         $password = "$(NPLabsRepoSigningKey)"
         $protectedCertificateBytes = $certCollection.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pkcs12, $password)
-        $pfxPath = "SigningCert.pfx"
+        $pfxPath = "$(System.DefaultWorkingDirectory)\SigningCert.pfx"
         [System.IO.File]::WriteAllBytes($pfxPath, $protectedCertificateBytes)
-  - task: Bash@3
-    displayName: "Update Nuget"
-    inputs:
-      targetType: inline
-      script: |
-        nuget update -self
+  - script: |
+      setx CSC_LINK ".\SigningCert.pfx"
+      setx CSC_KEY_PASSWORD "$(NPLabsRepoSigningKey)"
+    displayName: 'Set signing variables'
+  
