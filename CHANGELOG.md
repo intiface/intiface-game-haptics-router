@@ -1,3 +1,10 @@
+# v15 (2021-12-11)
+
+## Features
+
+- Update to Buttplug C# v2.0.6
+  - Lots of bugfixes and hardware updates, see buttplug library CHANGELOG for more info
+
 # v14 (2021-02-13)
 
 ## Bugfixes
