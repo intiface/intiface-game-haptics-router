@@ -12,6 +12,8 @@ namespace GHRXInputModInterface
     {
         public ushort LeftMotorSpeed;
         public ushort RightMotorSpeed;
+        // This is an extra field that will remain uninitialized when deserialized from memory.
+        public int ControllerIndex;
 
         public static bool operator ==(Vibration c1, Vibration c2)
         {

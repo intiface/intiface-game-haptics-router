@@ -16,6 +16,7 @@ namespace GHRXInputModPayload
         private readonly Queue<Vibration> _messageQueue = new Queue<Vibration>();
         private static Exception _ex;
         private static GHRXInputModPayload _instance;
+        private Dictionary<int, Vibration> _lastMessages = new Dictionary<int, Vibration>(); 
 
         // Use 1_3 first, seems to be most popular. It seems that some games
         // link both xinput1_4 and xinput9_1_0, but seem to prefer xinput9_1_0?
@@ -179,21 +180,33 @@ namespace GHRXInputModPayload
             try
             {
                 GHRXInputModPayload This = _instance;
+                Vibration oldMessage = new Vibration { LeftMotorSpeed = 65535, RightMotorSpeed = 65535 };
+
+                if (!This._lastMessages.TryGetValue(aGamePadIndex, out oldMessage))
+                {
+                    This._lastMessages.Add(aGamePadIndex, oldMessage);
+                }
                 // No reason to send duplicate packets.
-                if (This._lastMessage.LeftMotorSpeed == aVibrationRef.LeftMotorSpeed &&
-                    This._lastMessage.RightMotorSpeed == aVibrationRef.RightMotorSpeed)
+                if (oldMessage.LeftMotorSpeed == aVibrationRef.LeftMotorSpeed &&
+                    oldMessage.RightMotorSpeed == aVibrationRef.RightMotorSpeed)
                 {
                     return 0;
                 }
-                This._lastMessage = new Vibration
+
+                This._lastMessages[aGamePadIndex] = new Vibration
                 {
                     LeftMotorSpeed = aVibrationRef.LeftMotorSpeed,
-                    RightMotorSpeed = aVibrationRef.RightMotorSpeed
+                    RightMotorSpeed = aVibrationRef.RightMotorSpeed,
                 };
 
                 lock (This._messageQueue)
                 {
-                    This._messageQueue.Enqueue(This._lastMessage);
+                    This._messageQueue.Enqueue(new Vibration
+                    {
+                        LeftMotorSpeed = aVibrationRef.LeftMotorSpeed,
+                        RightMotorSpeed = aVibrationRef.RightMotorSpeed,
+                        ControllerIndex = aGamePadIndex
+                    });
                 }
             }
             catch (Exception e)

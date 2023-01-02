@@ -117,7 +117,7 @@ namespace IntifaceGameHapticsRouter
             }
 
             _lastVibration = aVibration;
-            MessageReceivedHandler?.Invoke(this, new GHRProtocolMessageContainer { XInputHaptics = new XInputHaptics(aVibration.LeftMotorSpeed, aVibration.RightMotorSpeed)});
+            MessageReceivedHandler?.Invoke(this, new GHRProtocolMessageContainer { XInputHaptics = new XInputHaptics(aVibration.LeftMotorSpeed, aVibration.RightMotorSpeed, aVibration.ControllerIndex)});
         }
 
         private void OnVibrationException(object aObj, Exception aEx)

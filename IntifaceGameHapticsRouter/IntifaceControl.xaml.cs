@@ -6,7 +6,9 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Buttplug;
+using Buttplug.Client;
+using Buttplug.Core;
+using Buttplug.Client.Connectors.WebsocketConnector;
 
 namespace IntifaceGameHapticsRouter
 {
@@ -39,6 +41,7 @@ namespace IntifaceGameHapticsRouter
         private List<ButtplugClientDevice> _devices = new List<ButtplugClientDevice>();
         private Task _connectTask;
         private bool _quitting;
+        private Dictionary<uint, uint> DeviceControllerMapping = new Dictionary<uint, uint>();
 
         public EventHandler ConnectedHandler;
         public EventHandler DisconnectedHandler;
@@ -58,12 +61,9 @@ namespace IntifaceGameHapticsRouter
                 IntifaceGameHapticsRouterProperties.Default.WebsocketAddress = _remoteAddress.Text;
                 IntifaceGameHapticsRouterProperties.Default.Save();
             };
-            _radioEmbedded.IsChecked = IntifaceGameHapticsRouterProperties.Default.UseEmbedded;
-            _radioRemote.IsChecked = IntifaceGameHapticsRouterProperties.Default.UseRemote;
-            OnRadioChange(null, null);
+
             if (_autoConnect.IsChecked == true)
             {
-                var addressArg = _radioEmbedded.IsChecked == false ? _remoteAddress.Text : null;
                 OnConnectClick(null, null);
             }
             _connectStatus.Text = "Not connected";
@@ -76,25 +76,10 @@ namespace IntifaceGameHapticsRouter
             IntifaceGameHapticsRouterProperties.Default.Save();
         }
 
-        public void OnRadioChange(object o, EventArgs e)
-        {
-            if (_radioEmbedded == null || _radioRemote == null)
-            {
-                return;
-            }
-            IntifaceGameHapticsRouterProperties.Default.UseEmbedded = _radioEmbedded.IsChecked == true;
-            IntifaceGameHapticsRouterProperties.Default.UseRemote = _radioRemote.IsChecked == true;
-            IntifaceGameHapticsRouterProperties.Default.Save();
-            EmbeddedConnectionOptions.Visibility = _radioEmbedded.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-            RemoteConnectionOptions.Visibility = _radioRemote.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-        }
-
         public void OnConnectClick(object o, EventArgs e)
         {
             _connectButton.IsEnabled = false;
-            _radioEmbedded.IsEnabled = false;
-            _radioRemote.IsEnabled = false;
-            var address = _radioEmbedded.IsChecked == false ? _remoteAddress.Text : null;
+            var address = _remoteAddress.Text;
             _connectTask = new Task(async () => await ConnectTask(address));
             _connectTask.Start();
         }
@@ -108,15 +93,9 @@ namespace IntifaceGameHapticsRouter
             client.ScanningFinished += OnScanningFinished;
             try
             {
-                if (aAddress == null)
-                {
-                    await client.ConnectAsync(new ButtplugEmbeddedConnectorOptions());
-                }
-                else
-                {
-                    var connector = new ButtplugWebsocketConnectorOptions(new Uri(aAddress));
-                    await client.ConnectAsync(connector);
-                }
+
+                var connector = new ButtplugWebsocketConnector(new Uri(aAddress));
+                await client.ConnectAsync(connector);
 
                 _client = client;
 
@@ -133,14 +112,14 @@ namespace IntifaceGameHapticsRouter
                     }
                 });
             }
-            catch (ButtplugConnectorException ex)
+            catch (ButtplugClientConnectorException ex)
             {
                 Debug.WriteLine("Connection failed.");
                 // If the exception was thrown after connect, make sure we disconnect.
                 if (_client != null && _client.Connected)
                 {
                     await _client.DisconnectAsync();
-                    _client = null;
+                    DisposeClient();
                 }
                 Dispatcher.Invoke(() =>
                 {
@@ -168,8 +147,6 @@ namespace IntifaceGameHapticsRouter
                     Dispatcher.Invoke(() =>
                     {
                         _connectButton.IsEnabled = true;
-                        _radioEmbedded.IsEnabled = true;
-                        _radioRemote.IsEnabled = true;
                     });
                 }
             }
@@ -237,8 +214,7 @@ namespace IntifaceGameHapticsRouter
                 _disconnectButton.Visibility = Visibility.Collapsed;
                 _connectStatus.Text = "Disconnected";
                 DevicesList.Clear();
-                _client.Dispose();
-                _client = null;
+                DisposeClient();
             });
         }
 
@@ -249,6 +225,7 @@ namespace IntifaceGameHapticsRouter
                 try
                 {
                     DevicesList.Add(new CheckedListItem(aArgs.Device));
+                    DeviceControllerMapping.Add(aArgs.Device.Index, 0x0F);
                 }
                 catch (Exception ex)
                 {
@@ -273,24 +250,28 @@ namespace IntifaceGameHapticsRouter
             });
         }
 
-        public async Task Vibrate(double aSpeed)
+        public async Task Vibrate(uint index, double aSpeed)
         {
             foreach (var deviceItem in DevicesList)
             {
-                if (deviceItem.IsChecked && deviceItem.Device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.VibrateCmd))
+                if ((index & DeviceControllerMapping[deviceItem.Id]) == 0)
                 {
-                    await deviceItem.Device.SendVibrateCmd(aSpeed);
+                    continue;
                 }
-                if (deviceItem.IsChecked && deviceItem.Device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.RotateCmd))
+                if (deviceItem.IsChecked && deviceItem.Device.VibrateAttributes.Count > 0)
                 {
-                    await deviceItem.Device.SendRotateCmd(aSpeed, true);
+                    await deviceItem.Device.VibrateAsync(aSpeed);
+                }
+                if (deviceItem.IsChecked && deviceItem.Device.RotateAttributes.Count > 0)
+                {
+                    await deviceItem.Device.RotateAsync(aSpeed, true);
                 }
             }
         }
 
         public async Task StopVibration()
         {
-            await Vibrate(0);
+            await Vibrate(0xF, 0);
         }
 
         private void DisposeClient()
@@ -301,6 +282,56 @@ namespace IntifaceGameHapticsRouter
             }
             _client.Dispose();
             _client = null;
+        }
+
+        private void DeviceListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DeviceListBox.SelectedItem != null)
+            {
+                ControllerSelection.Visibility = Visibility.Visible;
+            } else
+            {
+                ControllerSelection.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            foreach (CheckedListItem item in DeviceListBox.Items)
+            {
+                if (item.Id == ((CheckedListItem)((CheckBox)sender).DataContext).Id)
+                {
+                    DeviceListBox.SelectedItem = item;
+                    return;
+                }
+            }
+        }
+
+        private void UseController1_Checked(object sender, RoutedEventArgs e)
+        {
+            if ((sender as CheckBox).IsChecked == true)
+            {
+
+            }
+            else
+            {
+
+            }
+        }
+
+        private void UseController2_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void UseController3_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void UseController4_Checked(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

@@ -63,16 +63,18 @@ namespace IntifaceGameHapticsRouter
     {
         public uint LeftMotor;
         public uint RightMotor;
+        public int ControllerIndex;
 
         public XInputHaptics()
         {
 
         }
 
-        public XInputHaptics(uint aLeft, uint aRight)
+        public XInputHaptics(uint aLeft, uint aRight, int controllerIndex)
         {
             LeftMotor = aLeft;
             RightMotor = aRight;
+            ControllerIndex = controllerIndex;
         }
     }
 

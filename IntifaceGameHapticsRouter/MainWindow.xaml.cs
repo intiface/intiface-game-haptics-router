@@ -17,7 +17,7 @@ namespace IntifaceGameHapticsRouter
         private readonly NLog.Logger _log;
         private Timer vrTimer = new Timer();
         private Timer xinputTimer = new Timer();
-        private XInputHaptics _lastXInput = new XInputHaptics(0, 0);
+        private XInputHaptics _lastXInput = new XInputHaptics(0, 0, 0);
         private bool _needXInputRecalc;
         private double _multiplier;
         private double _baseline;
@@ -100,7 +100,7 @@ namespace IntifaceGameHapticsRouter
         protected async void OnVRTimer(object aObj, ElapsedEventArgs aArgs)
         {
             vrTimer.Stop();
-            await Dispatcher.Invoke(async () => { await _intifaceTab.Vibrate(0); });
+            await Dispatcher.Invoke(async () => { await _intifaceTab.Vibrate(0xF, 0); });
         }
 
         protected async void OnXInputTimer(object aObj, ElapsedEventArgs aArgs)
@@ -128,7 +128,7 @@ namespace IntifaceGameHapticsRouter
             var vibeSpeed = Math.Min(Math.Max(averageVibeSpeed * _multiplier, _baseline), 1.0);
             Debug.WriteLine($"Updating XInput haptics to {vibeSpeed}");
             _needXInputRecalc = false;
-            await Dispatcher.Invoke(async () => { await _intifaceTab.Vibrate(vibeSpeed); });
+            await Dispatcher.Invoke(async () => { await _intifaceTab.Vibrate((uint)_lastXInput.ControllerIndex, vibeSpeed); });
         }
 
         protected async void OnGVRMessageReceived(object aObj, GHRProtocolMessageContainer aMsg)
@@ -146,11 +146,12 @@ namespace IntifaceGameHapticsRouter
                 vrTimer.Start();
                 if (!isEnabled)
                 {
-                    await Dispatcher.Invoke(async () => { await _intifaceTab.Vibrate(Math.Min(Math.Max(_multiplier, _baseline), 1.0)); });
+                    await Dispatcher.Invoke(async () => { await _intifaceTab.Vibrate(0xF, Math.Min(Math.Max(_multiplier, _baseline), 1.0)); });
                 }
             }
             else if (aMsg.XInputHaptics != null)
             {
+                Console.WriteLine($"{aMsg.XInputHaptics.ControllerIndex} {aMsg.XInputHaptics.LeftMotor} {aMsg.XInputHaptics.RightMotor}");
                 _lastXInput = aMsg.XInputHaptics;
                 xinputTimer.Start();
                 _needXInputRecalc = true;
