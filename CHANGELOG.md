@@ -1,3 +1,14 @@
+# v16 (2023-02-25)
+
+## Features
+
+- Reroute rumble from all connected controllers, not just first controller
+- Remove embedded server, now only connects to Intiface Central
+- Remove unity support (Broken, will be readded once fixed)
+- Update to Buttplug C# v3
+  - Mostly bugfixes for the moment.
+- Add help tab
+
 # v15 (2021-12-11)
 
 ## Features
