@@ -30,6 +30,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>                        
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"></RowDefinition>
@@ -39,6 +40,11 @@
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Grid.Column="0" Margin="0,5,0,5">Websocket Address Port:</Label>
                     <TextBox Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" Name="_remoteAddress">ws://127.0.0.1:12345</TextBox>
+                    <Label Grid.Row="0" Grid.Column="2" Margin="0,5,0,5" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Hyperlink NavigateUri="https://intiface.com/central">
+                            <Run Text="Download Intiface Central"/>
+                        </Hyperlink>
+                    </Label>
                     <Grid Grid.Row="4" Grid.ColumnSpan="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
