@@ -61,16 +61,6 @@ namespace IntifaceGameHapticsRouter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sat 02/25/2023 12:13:17.13 
-        ///.
-        /// </summary>
-        internal static string BuildDate {
-            get {
-                return ResourceManager.GetString("BuildDate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] help {
