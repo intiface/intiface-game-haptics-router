@@ -1,3 +1,10 @@
+# v17 (2023-02-26)
+
+## Bugfixes
+
+- Fix bug where controller indexes were being checked raw instead of as a bitfield comparison,
+  meaning no commands were ever sent to Intiface. (#40)
+
 # v16 (2023-02-25)
 
 ## Features

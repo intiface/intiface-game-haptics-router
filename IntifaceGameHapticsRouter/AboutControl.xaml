@@ -26,7 +26,7 @@
                     <RowDefinition Height="auto"></RowDefinition>
                 </Grid.RowDefinitions>
                 <TextBlock x:Name="TitleText"  Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" Height="auto" Width="auto">
-                    <Run FontWeight="Bold" FontSize="19" Text="Intiface Game Haptics Router v16"/><LineBreak/>
+                    <Run FontWeight="Bold" FontSize="19" Text="Intiface Game Haptics Router v17"/><LineBreak/>
                     <Run Text="By "/><Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://nonpolynomial.com/">Nonpolynomial</Hyperlink><LineBreak/>
                     <LineBreak/>
                     <Run Text="Software updates at "/><Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://intiface.com/ghr">https://intiface.com/ghr</Hyperlink><LineBreak/>
