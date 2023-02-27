@@ -250,11 +250,12 @@ namespace IntifaceGameHapticsRouter
             });
         }
 
-        public async Task Vibrate(uint index, double aSpeed)
+        public async Task Vibrate(uint controllerIndex, double aSpeed)
         {
             foreach (var deviceItem in DevicesList)
             {
-                if ((index & DeviceControllerMapping[deviceItem.Id]) == 0)
+                // This is a comparison between the controller index and the bitfield for mapping, hence the shift.
+                if (((1 << (int)controllerIndex) & DeviceControllerMapping[deviceItem.Id]) == 0)
                 {
                     continue;
                 }
@@ -267,11 +268,6 @@ namespace IntifaceGameHapticsRouter
                     await deviceItem.Device.RotateAsync(aSpeed, true);
                 }
             }
-        }
-
-        public async Task StopVibration()
-        {
-            await Vibrate(0xF, 0);
         }
 
         private void DisposeClient()
