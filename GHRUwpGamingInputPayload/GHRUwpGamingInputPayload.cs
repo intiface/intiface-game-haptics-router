@@ -44,7 +44,7 @@ namespace GHRUwpGamingInputPayload
                                 RightMotorSpeed = (ushort)(gamepad.Vibration.RightMotor * 65536),
                                 ControllerIndex = 0
                             });
-                            _interface.Ping(RemoteHooking.GetCurrentProcessId(), $"Vibration: {gamepad.Vibration.LeftMotor} {gamepad.Vibration.RightMotor}");
+                            //_interface.Ping(RemoteHooking.GetCurrentProcessId(), $"Vibration: {gamepad.Vibration.LeftMotor} {gamepad.Vibration.RightMotor}");
                         }
                     }
                     if (_messageQueue.Count > 0)
