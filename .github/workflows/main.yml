@@ -5,6 +5,9 @@ on:
     branches:
       - dev
       - master
+    tags:
+      - 'v*'      
+      
 
 jobs:
   build-stable:
