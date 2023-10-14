@@ -185,7 +185,6 @@
     <Compile Include="LogControl.xaml.cs">
       <DependentUpon>LogControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UnityVRMod.cs" />
     <Compile Include="VisualizerControl.xaml.cs">
       <DependentUpon>VisualizerControl.xaml</DependentUpon>
     </Compile>
@@ -230,6 +229,8 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UWPInputMod.cs" />
+    <Compile Include="EasyHookMod.cs" />
     <Compile Include="XInputMod.cs" />
     <Compile Include="ModControl.xaml.cs">
       <DependentUpon>ModControl.xaml</DependentUpon>
@@ -275,15 +276,9 @@
       <Project>{b72b6502-e1b3-421a-b723-b294bf5f9e6b}</Project>
       <Name>SharpMonoInjector</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GHRUnityVRModNet35\GHRUnityVRModNet35.csproj">
-      <Project>{deb31023-7d8f-49f0-8b06-b35bda37672d}</Project>
-      <Name>GHRUnityVRModNet35</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\GHRUnityVRModNet45\GHRUnityVRModNet45.csproj">
-      <Project>{09ed6f36-fd6b-4b16-a5c8-95f2e1339424}</Project>
-      <Name>GHRUnityVRModNet45</Name>
-      <Private>False</Private>
+    <ProjectReference Include="..\GHRUwpGamingInputPayload\GHRUwpGamingInputPayload.csproj">
+      <Project>{5ae2a36b-ef88-47f5-a215-56202d557989}</Project>
+      <Name>GHRUwpGamingInputPayload</Name>
     </ProjectReference>
     <ProjectReference Include="..\GHRXInputModInterface\GHRXInputModInterface.csproj">
       <Project>{96ebcd5e-a218-4ddc-a8be-83e9369f5465}</Project>
@@ -307,10 +302,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="intiface-ghr-logo-1.ico" />
+    <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Resources\" />
+    <Resource Include="intiface-ghr-logo-1.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
