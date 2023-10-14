@@ -14,7 +14,7 @@ namespace IntifaceGameHapticsRouter
     /// </summary>
     public partial class AboutControl : UserControl
     {
-        private string _currentVersion = "v17";
+        private string _currentVersion = "v18";
 
         public AboutControl()
         {

@@ -1,3 +1,10 @@
+# v18 (2023-10-06)
+
+## Features
+
+- Added UWP detection/injection
+- New Icon
+
 # v17 (2023-02-26)
 
 ## Bugfixes
