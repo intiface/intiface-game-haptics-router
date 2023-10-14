@@ -10,8 +10,7 @@ The Intiface Game Haptics Router allows users to reroute vibration and other eve
 to control sex hardware supported by the [Buttplug Library](https://buttplug.io). This currently
 includes:
 
-- Games using Windows XInput (Xbox Gamepads)
-- Games using Unity VR (Any Version)
+- Games using Windows XInput or UWP (Xbox Gamepads)
 
 Toys that support vibration or rotation are supported by the GHR:
 
@@ -68,14 +67,14 @@ forward the information out to the GHR, which then sends it to whatever hardware
 For XInput, we use [EasyHook](https://easyhook.github.io/) for attaching from managed C# to
 unmanaged C.
 
-For Unity, we use a combination of [Harmony](https://github.com/pardeike/Harmony/) and
+For Unity, we were using a combination of [Harmony](https://github.com/pardeike/Harmony/) and
 [SharpMonoInjector](https://github.com/warbler/SharpMonoInjector) for attaching to the Unity
-assemblies.
+assemblies. This stopped working a while ago and needs to be rebuilt.
 
 **What kind of events does the GHR handle?**
 
-Right now, any time a gamepad or VR controller rumbles, we pass that information on to make hardware
-connected to the GHR rumble.
+Right now, any time a gamepad rumbles, we pass that information on to make hardware connected to the
+GHR rumble.
 
 In the future, we do plan on supporting game specific mods.
 
@@ -89,8 +88,9 @@ No one will know you put a buttplug in your game.
 **Can I use the GHR with games with anti-cheat mechanisms?**
 
 No. Our injection and loading process, while usually not VAC triggering, will still be caught by
-games like Overwatch and denied. We do not recommend using the GHR with any game that has anti-cheat
-mechanisms, and we are not resposible for whatever may happen to your game account if you try it.
+games like Overwatch, Rocket League, etc... and denied. We do not recommend using the GHR with any
+game that has anti-cheat mechanisms, and we are not resposible for whatever may happen to your game
+account if you try it.
 
 **What type of hardware does the GHR work with?**
 
