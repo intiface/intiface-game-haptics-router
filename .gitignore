@@ -3,7 +3,8 @@
 .vs
 *.DotSettings.user
 packages
-**/EasyHook*
+**/EasyHook*.dll
+**/EasyHook*.exe
 **/EasyLoad*
 installer
 **/BuildDate.txt
