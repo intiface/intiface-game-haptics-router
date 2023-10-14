@@ -8,6 +8,8 @@ using System.Threading;
 using EasyHook;
 using NLog;
 using SharpMonoInjector;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
 
 namespace IntifaceGameHapticsRouter
 {
@@ -21,23 +23,55 @@ namespace IntifaceGameHapticsRouter
     public partial class ModControl
     {
         public EventHandler<GHRProtocolMessageContainer> MessageReceivedHandler;
+        
+        private static string GetProcessUser(Process process)
+        {
+            IntPtr processHandle = IntPtr.Zero;
+            try
+            {
+                OpenProcessToken(process.Handle, 8, out processHandle);
+                WindowsIdentity wi = new WindowsIdentity(processHandle);
+                string user = wi.Name;
+                return user.Contains(@"\") ? user.Substring(user.IndexOf(@"\") + 1) : user;
+            }
+            catch
+            {
+                return null;
+            }
+            finally
+            {
+                if (processHandle != IntPtr.Zero)
+                {
+                    CloseHandle(processHandle);
+                }
+            }
+        }
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        private static extern bool OpenProcessToken(IntPtr ProcessHandle, uint DesiredAccess, out IntPtr TokenHandle);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool CloseHandle(IntPtr hObject);
 
         public class ProcessInfo
         {
             public string FileName;
             public int Id;
             public string Owner;
+            public bool isUWP;
             public IntPtr MonoModule = IntPtr.Zero;
-            public UnityVRMod.NetFramework FrameworkVersion = UnityVRMod.NetFramework.UNKNOWN;
+//            public UnityVRMod.NetFramework FrameworkVersion = UnityVRMod.NetFramework.UNKNOWN;
 
-            public bool CanUseXInput => !string.IsNullOrEmpty(Owner);
+            public bool CanUseXInput => !string.IsNullOrEmpty(Owner) && !isUWP;
+
+            public bool CanUseUWP => !string.IsNullOrEmpty(Owner) && isUWP;
 
             public bool CanUseMono => MonoModule != IntPtr.Zero;
 
             public override string ToString()
             {
                 var f = System.IO.Path.GetFileNameWithoutExtension(FileName);
-                return $"{f} ({Id}) ({(CanUseMono ? $"Mono/{FrameworkVersion}" : "")}{(CanUseXInput && CanUseMono ? " | " : "")}{(CanUseXInput ? "XInput" : "")})";
+                return $"{f} ({Id}) ({(CanUseXInput ? "XInput" : "")}{(CanUseUWP ? "UWP" : "")})";
             }
 
             public bool IsLive => Process.GetProcessById(Id) != null;
@@ -58,7 +92,7 @@ namespace IntifaceGameHapticsRouter
                 _attached = value;
                 ProcessListBox.IsEnabled = !value;
                 RefreshButton.IsEnabled = !value;
-                AttachButton.IsEnabled = _unityMod == null;
+                AttachButton.IsEnabled = true;
                 AttachButton.Content = value ? "Detach From Process" : "Attach To Process";
             }
         }
@@ -76,8 +110,8 @@ namespace IntifaceGameHapticsRouter
         private bool _attached = false;
         private readonly Logger _log;
         private Task _enumProcessTask;
-        private UnityVRMod _unityMod;
-        private XInputMod _xinputMod;
+//        private UnityVRMod _unityMod;
+        private EasyHookMod _easyHookMod;
         private CancellationTokenSource _scanningTokenSource = null;
         private CancellationToken _scanningToken;
 
@@ -140,19 +174,26 @@ namespace IntifaceGameHapticsRouter
                         FileName = currentProc.ProcessName,
                         Id = currentProc.Id,
                     };
-
-                    if (XInputMod.CanUseMod(handle))
+                    
+                    if (new XInputMod().CanUseMod(handle) || procInfo.FileName == "steam")
                     {
                         procInfo.Owner = owner;
                     }
 
+                    if (new UWPInputMod().CanUseMod(handle))
+                    {
+                        procInfo.Owner = owner;
+                        procInfo.isUWP = true;
+                    }
+                    /*
                     if (UnityVRMod.CanUseMod(handle, currentProc.MainModule.FileName, out var module, out var frameworkVersion))
                     {
                         procInfo.MonoModule = module;
                         procInfo.FrameworkVersion = frameworkVersion;
                     }
+                    */
 
-                    if (procInfo.CanUseXInput || procInfo.CanUseMono)
+                    if (procInfo.CanUseXInput || procInfo.CanUseUWP || procInfo.CanUseMono)
                     {
                         Dispatcher.Invoke(() =>
                         {
@@ -222,6 +263,7 @@ namespace IntifaceGameHapticsRouter
                 var attached = false;
                 try
                 {
+                    /*
                     if (process.CanUseMono)
                     {
                         _unityMod = new UnityVRMod();
@@ -229,12 +271,21 @@ namespace IntifaceGameHapticsRouter
                         _unityMod.Inject(process.Id, process.FrameworkVersion, process.MonoModule);
                         attached = true;
                     }
+                    */
 
-                    if (process.CanUseXInput)
+                    if (process.CanUseUWP)
                     {
-                        _xinputMod = new XInputMod();
-                        _xinputMod.Attach(process.Id);
-                        _xinputMod.MessageReceivedHandler += OnMessageReceived;
+                        _easyHookMod = new UWPInputMod();
+                        _easyHookMod.Attach(process.Id);
+                        _easyHookMod.MessageReceivedHandler += OnMessageReceived;
+                        attached = true;
+                    }
+
+                    if (process.CanUseXInput && _easyHookMod == null)
+                    {
+                        _easyHookMod = new XInputMod();
+                        _easyHookMod.Attach(process.Id);
+                        _easyHookMod.MessageReceivedHandler += OnMessageReceived;
                         attached = true;
                     }
 
@@ -242,7 +293,7 @@ namespace IntifaceGameHapticsRouter
                     {
                         Attached = true;
                         ProcessAttached?.Invoke(this, null);
-                        ProcessStatus = $"Attached to {process.FileName} ({process.Id}) {(_unityMod != null ? " - Restart GHR to detach" : "")}";
+                        ProcessStatus = $"Attached to {process.FileName} ({process.Id})";
                     }
                 } 
                 catch
@@ -263,8 +314,8 @@ namespace IntifaceGameHapticsRouter
 
         private void Detach()
         {
-            _xinputMod.Detach();
-            _xinputMod = null;
+            _easyHookMod.Detach();
+            _easyHookMod = null;
             Attached = false;
         }
     }

@@ -15,7 +15,8 @@ namespace IntifaceGameHapticsRouter
 
         public override void Attach(int aProcessId)
         {
-           Attach<GHRXInputModPayload.GHRXInputModPayload>(aProcessId, "GHRXInputModPayload.dll");
+            _log.Info("Attaching XInput Mod Payload");
+            Attach<GHRXInputModPayload.GHRXInputModPayload>(aProcessId, "GHRXInputModPayload.dll");
         }
 
         public XInputMod()

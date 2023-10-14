@@ -29,6 +29,7 @@ namespace IntifaceGameHapticsRouter
 
         public override void Attach(int aProcessId)
         {
+            _log.Info("Attaching UWP Mod Payload");
             Attach<GHRUwpGamingInputPayload.GHRUwpGamingInputPayload>(aProcessId, "GHRUwpGamingInputPayload.dll");
         }
 
