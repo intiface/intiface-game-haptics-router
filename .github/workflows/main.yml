@@ -1,0 +1,51 @@
+name: GHR CI Build
+
+on:
+  push:
+    branches:
+      - dev
+      - master
+
+jobs:
+  build-stable:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+    - name: Build app for release
+      run: msbuild IntifaceGameHapticsRouter\IntifaceGameHapticsRouter.csproj -t:rebuild -verbosity:diag -property:Configuration=Release      
+    - uses: dlemstra/code-sign-action@v1
+      with:
+        certificate: '${{ secrets.NPLABS_WINDOWS_202205_CERT }}'
+        password: '${{ secrets.NPLABS_WINDOWS_202205_KEY }}'
+        folder: '.\IntifaceGameHapticsRouter\bin\Release'
+        recursive: false
+        files: |
+          *.exe
+          *.dll
+        description: 'Sign Intiface Central Executable'        
+    - name: Build Innosetup Installer
+      shell: pwsh
+      env:
+        BUILD_VERSION: ${{ github.ref_name }}
+      run: |
+        iscc .\intiface-ghr-installer.iss
+    - uses: dlemstra/code-sign-action@v1
+      with:
+        certificate: '${{ secrets.NPLABS_WINDOWS_202205_CERT }}'
+        password: '${{ secrets.NPLABS_WINDOWS_202205_KEY }}'
+        folder: '.\installer\'
+        recursive: false
+        files: |
+          intiface-game-haptics-router-installer.exe
+        description: 'Sign Intiface Central Installer'          
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-installer
+        path: |
+          installer/intiface-game-haptics-router-installer.exe
