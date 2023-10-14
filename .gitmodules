@@ -1,4 +1,0 @@
-[submodule "dependencies/SharpMonoInjector"]
-	path = dependencies/SharpMonoInjector
-	url = https://github.com/intiface/SharpMonoInjector
-	branch = master
