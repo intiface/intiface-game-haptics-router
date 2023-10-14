@@ -5,16 +5,16 @@ using System.Threading;
 using GHRXInputModInterface;
 using Windows.Gaming.Input;
 
-namespace GHRXInputModPayload
+namespace GHRUwpGamingInputPayload
 {
-    public class GHRXInputModPayload : IEntryPoint
+    public class GHRUwpGamingInputPayload : IEntryPoint
     {
         private readonly GHRXInputModInterface.GHRXInputModInterface _interface;
         private readonly Queue<Vibration> _messageQueue = new Queue<Vibration>();
         private static Exception _ex;
         private Dictionary<int, Vibration> _lastMessages = new Dictionary<int, Vibration>();
 
-        public GHRXInputModPayload(
+        public GHRUwpGamingInputPayload(
             RemoteHooking.IContext aInContext,
             String aInChannelName)
         {
