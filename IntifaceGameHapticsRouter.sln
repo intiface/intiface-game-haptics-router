@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.202
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpMonoInjector", "dependencies\SharpMonoInjector\src\SharpMonoInjector\SharpMonoInjector.csproj", "{B72B6502-E1B3-421A-B723-B294BF5F9E6B}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHRXInputModInterface", "GHRXInputModInterface\GHRXInputModInterface.csproj", "{96EBCD5E-A218-4DDC-A8BE-83E9369F5465}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHRXInputModPayload", "GHRXInputModPayload\GHRXInputModPayload.csproj", "{8DF536FA-A44F-437C-8606-0FC0623588C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHRUwpGamingInputPayload", "GHRUwpGamingInputPayload\GHRUwpGamingInputPayload.csproj", "{5AE2A36B-EF88-47F5-A215-56202D557989}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,14 @@ Global
 		{8DF536FA-A44F-437C-8606-0FC0623588C1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8DF536FA-A44F-437C-8606-0FC0623588C1}.Release|x64.ActiveCfg = Release|x64
 		{8DF536FA-A44F-437C-8606-0FC0623588C1}.Release|x64.Build.0 = Release|x64
+		{5AE2A36B-EF88-47F5-A215-56202D557989}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AE2A36B-EF88-47F5-A215-56202D557989}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AE2A36B-EF88-47F5-A215-56202D557989}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5AE2A36B-EF88-47F5-A215-56202D557989}.Debug|x64.Build.0 = Debug|Any CPU
+		{5AE2A36B-EF88-47F5-A215-56202D557989}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AE2A36B-EF88-47F5-A215-56202D557989}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AE2A36B-EF88-47F5-A215-56202D557989}.Release|x64.ActiveCfg = Release|Any CPU
+		{5AE2A36B-EF88-47F5-A215-56202D557989}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
