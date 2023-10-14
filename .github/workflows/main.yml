@@ -19,8 +19,9 @@ jobs:
     - uses: nuget/setup-nuget@v1
     - run: nuget restore IntifaceGameHapticsRouter.sln      
     - name: Build app for release
-      run: msbuild IntifaceGameHapticsRouter.sln -t:rebuild -property:Configuration=Release      
-    - uses: dlemstra/code-sign-action@v1
+      run: msbuild IntifaceGameHapticsRouter.sln -t:rebuild -property:Configuration=Release
+    - name: Sign Game Haptics Router Executable and DLLs
+      uses: dlemstra/code-sign-action@v1
       with:
         certificate: '${{ secrets.NPLABS_WINDOWS_202205_CERT }}'
         password: '${{ secrets.NPLABS_WINDOWS_202205_KEY }}'
@@ -29,14 +30,15 @@ jobs:
         files: |
           *.exe
           *.dll
-        description: 'Sign Intiface Central Executable'        
+        description: 'Intiface Game Haptics Router Executable'        
     - name: Build Innosetup Installer
       shell: pwsh
       env:
         BUILD_VERSION: ${{ github.ref_name }}
       run: |
         iscc .\intiface-ghr-installer.iss
-    - uses: dlemstra/code-sign-action@v1
+    - name: Sign Intiface GHR Installer
+      uses: dlemstra/code-sign-action@v1    
       with:
         certificate: '${{ secrets.NPLABS_WINDOWS_202205_CERT }}'
         password: '${{ secrets.NPLABS_WINDOWS_202205_KEY }}'
@@ -44,7 +46,7 @@ jobs:
         recursive: false
         files: |
           intiface-game-haptics-router-installer.exe
-        description: 'Sign Intiface Central Installer'          
+        description: 'Intiface Game Haptics Router Installer'          
     - name: Archive production artifacts
       uses: actions/upload-artifact@v3
       with:
