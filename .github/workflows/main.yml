@@ -19,7 +19,7 @@ jobs:
     - uses: nuget/setup-nuget@v1
     - run: nuget restore IntifaceGameHapticsRouter.sln      
     - name: Build app for release
-      run: msbuild IntifaceGameHapticsRouter\IntifaceGameHapticsRouter.csproj -t:rebuild -property:Configuration=Release      
+      run: msbuild IntifaceGameHapticsRouter.sln -t:rebuild -property:Configuration=Release      
     - uses: dlemstra/code-sign-action@v1
       with:
         certificate: '${{ secrets.NPLABS_WINDOWS_202205_CERT }}'
