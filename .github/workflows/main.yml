@@ -8,7 +8,6 @@ on:
     tags:
       - 'v*'      
       
-
 jobs:
   build-stable:
     runs-on: ${{ matrix.os }}
@@ -22,34 +21,13 @@ jobs:
     - uses: nuget/setup-nuget@v1
     - run: nuget restore IntifaceGameHapticsRouter.sln      
     - name: Build app for release
-      run: msbuild IntifaceGameHapticsRouter.sln -t:rebuild -property:Configuration=Release
-    - name: Sign Game Haptics Router Executable and DLLs
-      uses: dlemstra/code-sign-action@v1
-      with:
-        certificate: '${{ secrets.NPLABS_WINDOWS_202205_CERT }}'
-        password: '${{ secrets.NPLABS_WINDOWS_202205_KEY }}'
-        folder: '.\IntifaceGameHapticsRouter\bin\Release'
-        recursive: false
-        files: |
-          *.exe
-          *.dll
-        description: 'Intiface Game Haptics Router Executable'        
+      run: msbuild IntifaceGameHapticsRouter.sln -t:rebuild -property:Configuration=Release      
     - name: Build Innosetup Installer
       shell: pwsh
       env:
         BUILD_VERSION: ${{ github.ref_name }}
       run: |
         iscc .\intiface-ghr-installer.iss
-    - name: Sign Intiface GHR Installer
-      uses: dlemstra/code-sign-action@v1    
-      with:
-        certificate: '${{ secrets.NPLABS_WINDOWS_202205_CERT }}'
-        password: '${{ secrets.NPLABS_WINDOWS_202205_KEY }}'
-        folder: '.\installer\'
-        recursive: false
-        files: |
-          intiface-game-haptics-router-installer.exe
-        description: 'Intiface Game Haptics Router Installer'          
     - name: Archive production artifacts
       uses: actions/upload-artifact@v3
       with:
