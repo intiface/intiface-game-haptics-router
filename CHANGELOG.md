@@ -1,3 +1,10 @@
+# v19 (2024-06-01)
+
+## Features
+
+- No actual code changes from v18, just seeing if repacking with an EV cert kills the Windows
+  warnings while I work on rebuilding the GHR.
+
 # v18 (2023-10-06)
 
 ## Features

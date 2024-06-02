@@ -7,7 +7,7 @@
 [![Youtube](https://img.shields.io/badge/-youtube-red.svg)](https://youtube.buttplug.io)
 
 The Intiface Game Haptics Router allows users to reroute vibration and other events from video games
-to control sex hardware supported by the [Buttplug Library](https://buttplug.io). This currently
+to control sex hardware supported by [Buttplug and Intiface Central](https://intiface.com/central). This currently
 includes:
 
 - Games using Windows XInput or UWP (Xbox Gamepads)
