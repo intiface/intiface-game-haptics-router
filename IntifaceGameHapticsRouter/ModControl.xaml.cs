@@ -174,8 +174,8 @@ namespace IntifaceGameHapticsRouter
                         var procInfo = new ProcessInfo
                         {
                             FileName = currentProc.ProcessName,
-                            Id = currentProc.id,
-                            Owner = owner;
+                            Id = currentProc.Id,
+                            Owner = owner,
                         };
                         Dispatcher.Invoke(() =>
                         {
@@ -189,9 +189,9 @@ namespace IntifaceGameHapticsRouter
                         var procInfo = new ProcessInfo
                         {
                             FileName = currentProc.ProcessName,
-                            Id = currentProc.id,
-                            Owner = owner;
-                            isUWP = true;
+                            Id = currentProc.Id,
+                            Owner = owner,
+                            isUWP = true,
                         };
                         Dispatcher.Invoke(() =>
                         {
