@@ -168,39 +168,55 @@ namespace IntifaceGameHapticsRouter
                     {
                         return;
                     }
-
-                    var procInfo = new ProcessInfo
-                    {
-                        FileName = currentProc.ProcessName,
-                        Id = currentProc.Id,
-                    };
                     
                     if (new XInputMod().CanUseMod(handle) || procInfo.FileName == "steam")
                     {
-                        procInfo.Owner = owner;
-                    }
-
-                    if (new UWPInputMod().CanUseMod(handle))
-                    {
-                        procInfo.Owner = owner;
-                        procInfo.isUWP = true;
-                    }
-                    /*
-                    if (UnityVRMod.CanUseMod(handle, currentProc.MainModule.FileName, out var module, out var frameworkVersion))
-                    {
-                        procInfo.MonoModule = module;
-                        procInfo.FrameworkVersion = frameworkVersion;
-                    }
-                    */
-
-                    if (procInfo.CanUseXInput || procInfo.CanUseUWP || procInfo.CanUseMono)
-                    {
+                        var procInfo = new ProcessInfo
+                        {
+                            FileName = currentProc.ProcessName,
+                            Id = currentProc.id,
+                            Owner = owner;
+                        };
                         Dispatcher.Invoke(() =>
                         {
                             _log.Debug(procInfo);
                             _processList.Add(procInfo);
                         });
                     }
+
+                    if (new UWPInputMod().CanUseMod(handle))
+                    {
+                        var procInfo = new ProcessInfo
+                        {
+                            FileName = currentProc.ProcessName,
+                            Id = currentProc.id,
+                            Owner = owner;
+                            isUWP = true;
+                        };
+                        Dispatcher.Invoke(() =>
+                        {
+                            _log.Debug(procInfo);
+                            _processList.Add(procInfo);
+                        });
+                    }
+
+                    /*
+                    if (UnityVRMod.CanUseMod(handle, currentProc.MainModule.FileName, out var module, out var frameworkVersion))
+                    {
+                        var procInfo = new ProcessInfo
+                        {
+                            FileName = currentProc.ProcessName,
+                            Id = currentProc.id,
+                            MonoModule = module;
+                            FrameworkVersion = frameworkVersion;
+                        };
+                        Dispatcher.Invoke(() =>
+                        {
+                            _log.Debug(procInfo);
+                            _processList.Add(procInfo);
+                        });
+                    }
+                    */
                 }
                 catch (AccessViolationException)
                 {
