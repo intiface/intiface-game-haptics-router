@@ -8,7 +8,6 @@ using System.Windows;
 using System.Windows.Controls;
 using Buttplug.Client;
 using Buttplug.Core;
-using Buttplug.Client.Connectors.WebsocketConnector;
 
 namespace IntifaceGameHapticsRouter
 {
