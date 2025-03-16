@@ -24,7 +24,7 @@
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <TabControl Grid.Row="0" Grid.Column="0" Height="Auto" Width="Auto">
-            <TabItem Header="Intiface Connection" VerticalAlignment="Top" Padding="10, 3, 10, 3">
+            <TabItem Header="Intiface Connection" VerticalAlignment="Top" Padding="3, 0, 3, 0">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -35,7 +35,7 @@
                     <local:IntifaceControl x:Name="_intifaceTab"></local:IntifaceControl>
                 </Grid>
             </TabItem>
-            <TabItem Header="Process List" Padding="10, 3, 10, 3">
+            <TabItem Header="Process List" Padding="3, 0, 3, 0">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -46,7 +46,7 @@
                     <local:ModControl x:Name="_modTab"></local:ModControl>
                 </Grid>
             </TabItem>
-            <TabItem Header="Visualizer/Settings" Padding="10, 3, 10, 3">
+            <TabItem Header="Visualizer/Settings" Padding="3, 0, 3, 0">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -57,7 +57,7 @@
                     <local:VisualizerControl x:Name="_graphTab"></local:VisualizerControl>
                 </Grid>
             </TabItem>
-            <TabItem Header="Logs" Padding="10, 3, 10, 3">
+            <TabItem Header="Logs" Padding="3, 0, 3, 0">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -68,10 +68,10 @@
                     <local:LogControl x:Name="_logTab"></local:LogControl>
                 </Grid>
             </TabItem>
-            <TabItem Header="Help" Padding="10, 3, 10, 3">
+            <TabItem Header="Help" Padding="3, 0, 3, 0">
                 <local:HelpControl x:Name="_helpTab"></local:HelpControl>
             </TabItem>
-            <TabItem Header="About" Padding="10, 3, 10, 3">
+            <TabItem Header="About" Padding="3, 0, 3, 0">
                 <local:AboutControl x:Name="_aboutTab"></local:AboutControl>
             </TabItem>
         </TabControl>
