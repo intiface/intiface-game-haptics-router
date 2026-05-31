@@ -21,7 +21,15 @@ namespace IntifaceGameHapticsRouter
         private bool _needXInputRecalc;
         private double _multiplier;
         private double _baseline;
+        private int _fadeMs;
+        private double _currentOutput;
+        // Anchored at the most recent attack peak. Held constant across all fade ticks so the
+        // release ramp stays linear over _fadeMs regardless of intermediate target oscillations.
+        private double _fadeStartLevel;
         private Task _updateTask;
+        private readonly DualSenseRumble _dualSense = new DualSenseRumble();
+        // Read on the xinputTimer's ThreadPool thread, written on the WPF dispatcher thread.
+        private volatile bool _directDualSenseRumbleEnabled;
 
         public MainWindow()
         {
@@ -53,8 +61,20 @@ namespace IntifaceGameHapticsRouter
             _graphTab.MultiplierChanged += OnMultiplierChanged;
             _graphTab.BaselineChanged += OnBaselineChanged;
             _graphTab.PacketGapChanged += OnPacketTimingChanged;
+            _graphTab.FadeMsChanged += OnFadeMsChanged;
+            _graphTab.DirectDualSenseRumbleChanged += OnDirectDualSenseRumbleChanged;
             _multiplier = _graphTab.Multiplier;
             _baseline = _graphTab.Baseline;
+            _fadeMs = _graphTab.FadeMs;
+            _directDualSenseRumbleEnabled = _graphTab.DirectDualSenseRumble;
+            if (_directDualSenseRumbleEnabled)
+            {
+                TryOpenDualSense();
+            }
+            else
+            {
+                _graphTab.SetDualSenseStatus("disabled", false);
+            }
             //_graphTab.PassthruChanged += PassthruChanged;
             _log.Info("Application started.");
             _updateTask = _aboutTab.CheckForUpdate();
@@ -68,6 +88,10 @@ namespace IntifaceGameHapticsRouter
         protected void OnProcessDetached(object aObj, EventArgs aNull)
         {
             _graphTab.StopUpdates();
+            if (_directDualSenseRumbleEnabled)
+            {
+                _dualSense.SetRumble(0, 0);
+            }
         }
 
         protected void OnMultiplierChanged(object aObj, double aValue)
@@ -92,6 +116,38 @@ namespace IntifaceGameHapticsRouter
             xinputTimer.Interval = IntifaceGameHapticsRouterProperties.Default.PacketTimingGapInMS;
         }
 
+        protected void OnFadeMsChanged(object o, int aValue)
+        {
+            _fadeMs = aValue;
+        }
+
+        protected void OnDirectDualSenseRumbleChanged(object o, bool enabled)
+        {
+            _directDualSenseRumbleEnabled = enabled;
+            if (enabled)
+            {
+                TryOpenDualSense();
+            }
+            else
+            {
+                _dualSense.SetRumble(0, 0);
+                _dualSense.Close();
+                _graphTab.SetDualSenseStatus("disabled", false);
+            }
+        }
+
+        private void TryOpenDualSense()
+        {
+            if (_dualSense.TryOpen())
+            {
+                _graphTab.SetDualSenseStatus("connected (USB)", true);
+            }
+            else
+            {
+                _graphTab.SetDualSenseStatus("not detected (USB-only prototype)", false);
+            }
+        }
+
         protected void OnLogMessage(object aObj, string aMsg)
         {
             _log.Info(aMsg);
@@ -109,26 +165,67 @@ namespace IntifaceGameHapticsRouter
             {
                 return;
             }
-            
-            // If we've received an off packet, just assume we won't be updating again until we get something new.
-            if (_lastXInput.LeftMotor == 0 && _lastXInput.RightMotor == 0 && _baseline == 0)
+
+            var averageVibeSpeed = (_lastXInput.LeftMotor + _lastXInput.RightMotor) / (2.0 * 65535.0);
+
+            // Target is the steady-state value the game/baseline is asking for.
+            // Floor at baseline so a fade naturally lands on the baseline level.
+            var target = Math.Min(Math.Max(averageVibeSpeed * _multiplier, _baseline), 1.0);
+
+            if (target >= _currentOutput)
+            {
+                // Snap up on attack — fade only applies on release.
+                _currentOutput = target;
+                _fadeStartLevel = target;
+            }
+            else if (_fadeMs <= 0)
+            {
+                _currentOutput = target;
+                _fadeStartLevel = target;
+            }
+            else
+            {
+                // Linear release from _fadeStartLevel to target over _fadeMs.
+                var tickMs = Math.Max(1, IntifaceGameHapticsRouterProperties.Default.PacketTimingGapInMS);
+                var span = _fadeStartLevel - target;
+                if (span > 0)
+                {
+                    var step = span * ((double)tickMs / _fadeMs);
+                    _currentOutput = Math.Max(target, _currentOutput - step);
+                }
+                else
+                {
+                    _currentOutput = target;
+                }
+            }
+
+            var motorVal = (uint)(_currentOutput * 65535.0);
+            _graphTab.UpdateVibrationValues(motorVal, motorVal);
+
+            if (_directDualSenseRumbleEnabled && _dualSense.IsOpen)
+            {
+                var motor255 = (byte)Math.Min(255, (int)(_currentOutput * 255.0));
+                if (!_dualSense.SetRumble(motor255, motor255))
+                {
+                    _graphTab.SetDualSenseStatus("disconnected", false);
+                }
+            }
+
+            // Keep ticking while we're still descending toward target.
+            var stillFading = _currentOutput > target + 1e-6;
+            _needXInputRecalc = stillFading;
+
+            // Stop the timer only once we've fully settled with no input and no baseline.
+            if (!stillFading
+                && _lastXInput.LeftMotor == 0
+                && _lastXInput.RightMotor == 0
+                && _baseline == 0
+                && _currentOutput <= 0.0)
             {
                 xinputTimer.Stop();
             }
 
-            _graphTab.UpdateVibrationValues(
-                Math.Max((uint)(_lastXInput.LeftMotor * _multiplier), (uint)(_baseline * 65535.0)),
-                Math.Max((uint)(_lastXInput.RightMotor * _multiplier), (uint)(_baseline * 65535.0)));
-
-            var averageVibeSpeed = (_lastXInput.LeftMotor + _lastXInput.RightMotor) / (2.0 * 65535.0);
-
-            // Calculate the vibe speed by first adding the multiplier to the averaged speed 
-            // Then check if it's above the baseline, if not default to the baseline
-            // If it is then make sure we don't go above 1.0 speed or things start breaking
-            var vibeSpeed = Math.Min(Math.Max(averageVibeSpeed * _multiplier, _baseline), 1.0);
-            Debug.WriteLine($"Updating XInput haptics to {vibeSpeed}");
-            _needXInputRecalc = false;
-            await Dispatcher.Invoke(async () => { await _intifaceTab.Vibrate((uint)_lastXInput.ControllerIndex, vibeSpeed); });
+            await Dispatcher.Invoke(async () => { await _intifaceTab.Vibrate((uint)_lastXInput.ControllerIndex, _currentOutput); });
         }
 
         protected void OnGVRMessageReceived(object aObj, GHRProtocolMessageContainer aMsg)

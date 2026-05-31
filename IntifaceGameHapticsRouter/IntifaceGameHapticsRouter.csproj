@@ -216,6 +216,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DualSenseRumble.cs" />
     <Compile Include="UWPInputMod.cs" />
     <Compile Include="EasyHookMod.cs" />
     <Compile Include="XInputMod.cs" />

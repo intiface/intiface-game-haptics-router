@@ -73,6 +73,30 @@ namespace IntifaceGameHapticsRouter {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int VibrationFadeMs {
+            get {
+                return ((int)(this["VibrationFadeMs"]));
+            }
+            set {
+                this["VibrationFadeMs"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DirectDualSenseRumble {
+            get {
+                return ((bool)(this["DirectDualSenseRumble"]));
+            }
+            set {
+                this["DirectDualSenseRumble"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool UseEmbedded {
             get {
